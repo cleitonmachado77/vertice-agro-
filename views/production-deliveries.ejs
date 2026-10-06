@@ -1,0 +1,68 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="<%= moduleBasePath %>/<%= production.IdProducao %>">&larr; Produção</a>
+    <p class="eyebrow">COMERCIALIZAÇÃO</p>
+    <h1>Entregas</h1>
+    <p class="muted"><strong><%= production.ProdutoNome %></strong> · <%= production.PropriedadeNome %> · <%= production.UnidadeNome %></p>
+  </div>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<section class="delivery-summary">
+  <div><span>Produtor</span><strong><%= production.ProdutorNome %></strong></div>
+  <div><span>Associação</span><strong><%= production.AssociacaoNome %></strong></div>
+  <div><span>Atividade / safra</span><strong><%= production.AtividadeNome %> · <%= production.SafraNome %></strong></div>
+  <div><span>Quantidade prevista</span><strong><%= production.Previsao === null ? '—' : Number(production.Previsao).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) %> <%= production.UnidadeSigla %></strong></div>
+</section>
+<section class="user-create-section">
+  <h2>Nova entrega</h2>
+  <% if (production.PropertyAtivo && buyerOptions.length) { %>
+    <form method="post" action="<%= moduleBasePath %>/<%= production.IdProducao %>/entregas" class="user-create-form delivery-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>Comprador<select name="buyerId" required><option value="">Selecione</option><% buyerOptions.filter((buyer) => buyer.Ativo).forEach((buyer) => { %><option value="<%= buyer.idComprador %>"><%= buyer.NomeComprador %></option><% }) %></select></label>
+      <label>Data da entrega<input name="date" type="date" required></label>
+      <label>Quantidade (<%= production.UnidadeSigla %>)<input name="quantity" type="number" min="0.01" step="any" required></label>
+      <label>Valor unitário (R$)<input name="unitPrice" type="number" min="0" step="0.01" inputmode="decimal"></label>
+      <label>Documento / referência<input name="document" maxlength="150"></label>
+      <button class="primary-button" type="submit">Registrar entrega</button>
+    </form>
+  <% } else if (!production.PropertyAtivo) { %>
+    <p class="empty-state">A propriedade está inativa; reative-a para registrar entregas.</p>
+  <% } else { %>
+    <p class="empty-state">Cadastre um Comprador ativo nas Configurações antes de registrar entregas.</p>
+  <% } %>
+</section>
+<section class="user-list-section">
+  <h2>Entregas registradas</h2>
+  <% if (deliveries.length) { %>
+    <div class="table-scroll">
+      <table class="users-table deliveries-table">
+        <thead><tr><th>Data</th><th>Comprador</th><th>Quantidade</th><th>Valor unitário</th><th>Total</th><th>Documento</th><th>Ações</th></tr></thead>
+        <tbody>
+          <% deliveries.forEach((delivery) => { %>
+            <tr data-editable-row>
+              <td><input form="update-delivery-<%= delivery.idEntrega %>" name="date" type="date" value="<%= delivery.DataEntrega %>" required aria-label="Data da entrega"></td>
+              <td>
+                <select form="update-delivery-<%= delivery.idEntrega %>" name="buyerId" aria-label="Comprador">
+                  <% buyerOptions.forEach((buyer) => { %><option value="<%= buyer.idComprador %>" <%= buyer.idComprador === delivery.Comprador_idComprador ? 'selected' : '' %> <%= !buyer.Ativo && buyer.idComprador !== delivery.Comprador_idComprador ? 'disabled' : '' %>><%= buyer.NomeComprador %><%= buyer.Ativo ? '' : ' (Inativo)' %></option><% }) %>
+                </select>
+              </td>
+              <td><input form="update-delivery-<%= delivery.idEntrega %>" name="quantity" type="number" min="0.01" step="any" value="<%= delivery.Quantidade %>" required aria-label="Quantidade"></td>
+              <td><input form="update-delivery-<%= delivery.idEntrega %>" name="unitPrice" type="number" min="0" step="0.01" inputmode="decimal" value="<%= delivery.ValorUnitario ?? '' %>" aria-label="Valor unitário em reais"></td>
+              <td><%= delivery.ValorTotal === null ? '—' : Number(delivery.ValorTotal).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %></td>
+              <td><input form="update-delivery-<%= delivery.idEntrega %>" name="document" maxlength="150" value="<%= delivery.DocumentoEntrega || '' %>" aria-label="Documento"></td>
+              <td class="user-actions">
+                <form id="update-delivery-<%= delivery.idEntrega %>" data-row-update method="post" action="<%= moduleBasePath %>/<%= production.IdProducao %>/entregas/<%= delivery.idEntrega %>/atualizar"><input type="hidden" name="_csrf" value="<%= csrfToken %>"></form>
+                <button class="small-button" type="button" data-edit-start>Editar</button>
+                <button class="small-button" form="update-delivery-<%= delivery.idEntrega %>" type="submit" data-edit-save hidden>Salvar</button>
+                <button class="small-button" type="button" data-edit-cancel hidden>Cancelar</button>
+                <form method="post" action="<%= moduleBasePath %>/<%= production.IdProducao %>/entregas/<%= delivery.idEntrega %>/excluir" data-confirm="Excluir esta entrega?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="small-button danger-button" type="submit">Excluir</button></form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %><p class="empty-state">Nenhuma entrega registrada para esta produção.</p><% } %>
+</section>
+<%- include('partials/footer') %>

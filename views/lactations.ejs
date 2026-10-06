@@ -1,0 +1,49 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="/modulos/pecuaria">&larr; Pecuária de Leite</a>
+    <p class="eyebrow">REBANHO · PRODUÇÃO LEITEIRA</p>
+    <h1>Registro de Lactações</h1>
+  </div>
+  <a class="primary-button" href="/pecuaria/lactacoes/nova">Nova Lactação <span aria-hidden="true">+</span></a>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<% if (success) { %><p class="form-success" role="status"><%= success %></p><% } %>
+<section class="user-list-section property-list-section">
+  <h2>Lactações registradas</h2>
+  <form method="get" action="/pecuaria/lactacoes" class="planning-filters">
+    <label>Propriedade
+      <select name="propertyId">
+        <option value="">Todas disponíveis</option>
+        <% properties.forEach((property) => { %>
+          <option value="<%= property.idPropriedade %>" <%= propertyId === property.idPropriedade ? 'selected' : '' %>><%= property.Nome %> · <%= property.ProdutorNome %></option>
+        <% }) %>
+      </select>
+    </label>
+    <button class="secondary-button" type="submit">Filtrar</button>
+  </form>
+  <% if (lactations.length) { %>
+    <div class="table-scroll">
+      <table class="users-table lactation-history-table">
+        <thead><tr><th>Animal</th><th>Propriedade</th><th>Categoria</th><th>Início</th><th>Término</th><th>Status</th><th>Ação</th></tr></thead>
+        <tbody><% lactations.forEach((lactation) => { %>
+          <tr>
+            <td><a href="/pecuaria/animais/<%= lactation.Animal_idAnimal %>"><strong><%= lactation.Brinco %></strong></a></td>
+            <td><%= lactation.PropriedadeNome %><br><small><%= lactation.ProdutorNome %></small></td>
+            <td><%= lactation.CategoriaNome || '—' %></td>
+            <td><%= formatDate(lactation.Inicio) %></td>
+            <td><%= formatDate(lactation.Termino) %></td>
+            <td><span class="status-chip <%= lactation.Termino ? 'status-inactive' : 'status-active' %>"><%= lactation.Termino ? 'Encerrada' : 'Em Lactação' %></span></td>
+            <td class="user-actions">
+              <% if (!lactation.Termino) { %>
+                <form class="dry-off-form" method="post" action="/pecuaria/lactacoes/<%= lactation.idLactacoes %>/secar" data-confirm="Confirmar a secagem deste animal?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="date" name="endDate" required min="<%= lactation.Inicio %>" max="<%= new Date().toISOString().slice(0, 10) %>" value="<%= new Date().toISOString().slice(0, 10) %>" aria-label="Data de secagem de <%= lactation.Brinco || lactation.Animal_idAnimal %>"><button class="small-button" type="submit">Secar</button></form>
+              <% } %>
+              <a class="small-button" href="/pecuaria/lactacoes/<%= lactation.idLactacoes %>/editar">Editar</a>
+            </td>
+          </tr>
+        <% }) %></tbody>
+      </table>
+    </div>
+  <% } else { %><p class="empty-state">Nenhuma lactação registrada.</p><% } %>
+</section>
+<%- include('partials/footer') %>

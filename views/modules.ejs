@@ -1,0 +1,19 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">ÁREA DE TRABALHO</p>
+    <h1>Escolha um módulo</h1>
+    <p class="muted">Acesso de <strong><%= user.Nome %></strong></p>
+  </div>
+</section>
+<section class="module-grid" aria-label="Módulos disponíveis">
+  <% modules.forEach((module, index) => { %>
+    <a class="module-card module-tone-<%= index %>" href="/modulos/<%= module.slug %>">
+      <span class="module-index">0<%= index + 1 %></span>
+      <span class="module-card-title"><%= module.title %></span>
+      <span class="module-card-subtitle"><%= module.subtitle %></span>
+      <span class="module-arrow" aria-hidden="true">&rarr;</span>
+    </a>
+  <% }) %>
+</section>
+<%- include('partials/footer') %>

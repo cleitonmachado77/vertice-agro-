@@ -1,0 +1,174 @@
+<%- include('partials/header') %>
+<% const propertyBasePath = moduleOrigin === 'pecuaria' ? '/pecuaria/propriedades' : '/agricultura/propriedades'; %>
+<section class="page-heading property-heading">
+  <div>
+    <a class="back-link" href="<%= propertyBasePath %>">&larr; Propriedades</a>
+    <p class="eyebrow"><%= moduleOrigin === 'pecuaria' ? 'PECUÁRIA DE LEITE · PROPRIEDADE' : 'CONFIGURAÇÃO DA PRODUÇÃO' %></p>
+    <h1><%= existing ? property.Nome : 'Nova propriedade' %></h1>
+    <% if (existing) { %><p class="muted"><%= property.ProdutorNome %> · <%= property.AssociacaoNome %></p><% } %>
+  </div>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<nav class="property-tabs" aria-label="Dados da propriedade">
+  <% const tabs = [{ id: 'dados', label: 'Dados da propriedade' }, { id: 'atividades', label: 'Atividades da Propriedade' }, { id: 'talhoes', label: 'Talhões' }]; %>
+  <% tabs.forEach((item) => { %>
+    <% if (existing) { %>
+      <a class="property-tab <%= tab === item.id ? 'is-active' : '' %>" href="<%= propertyBasePath %>/<%= property.idPropriedade %>?aba=<%= item.id %>"><%= item.label %></a>
+    <% } else { %>
+      <span class="property-tab <%= item.id === 'dados' ? 'is-active' : 'is-disabled' %>"><%= item.label %></span>
+    <% } %>
+  <% }) %>
+</nav>
+
+<% if (tab === 'dados') { %>
+  <section class="property-panel">
+    <div class="panel-heading"><h2>Dados da propriedade</h2></div>
+    <form method="post" action="<%= existing ? `${propertyBasePath}/${property.idPropriedade}/atualizar` : propertyBasePath %>" class="property-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="moduleOrigin" value="<%= moduleOrigin %>">
+      <label>Produtor
+        <select name="producerId" required>
+          <option value="">Selecione</option>
+          <% producerOptions.forEach((producer) => { %>
+            <option value="<%= producer.idProdutor %>" <%= existing && property.Produtor_idProdutor === producer.idProdutor ? 'selected' : '' %>><%= producer.Nome %> · <%= producer.Associacao %></option>
+          <% }) %>
+        </select>
+      </label>
+      <label>Nome da propriedade<input name="name" value="<%= property?.Nome || '' %>" required maxlength="150"></label>
+      <label>Município
+        <select name="municipalityId" required>
+          <option value="">Selecione</option>
+          <% municipalities.forEach((municipality) => { %>
+            <option value="<%= municipality.idMunicipio %>" <%= existing && property.Municipio_idMunicipio === municipality.idMunicipio ? 'selected' : '' %> <%= municipality.Ativo && municipality.EstadoAtivo ? '' : 'disabled' %>><%= municipality.Nome %> / <%= municipality.Sigla %></option>
+          <% }) %>
+        </select>
+      </label>
+      <label>Área total<input name="areaTotal" type="number" min="0" step="any" value="<%= property?.AreaTotal ?? '' %>"></label>
+      <label>Duração da gestação (dias)<input name="gestationDays" type="number" min="1" max="400" step="1" required value="<%= property?.DiasGestacao ?? defaultGestationDays %>"></label>
+      <label>Unidade da área
+        <select name="areaUnitId">
+          <option value="">Selecione</option>
+          <% areaUnits.forEach((unit) => { %>
+            <option value="<%= unit.idUnidadeArea %>" <%= existing && property.UnidadeArea_idUnidadeArea === unit.idUnidadeArea ? 'selected' : '' %> <%= unit.Ativo ? '' : 'disabled' %>><%= unit.Nome %> (<%= unit.Sigla %>)</option>
+          <% }) %>
+        </select>
+      </label>
+      <label>WhatsApp<input name="whatsapp" type="tel" maxlength="250" value="<%= property?.Fone_Whats || '' %>"></label>
+      <label>Contato<input name="contact" maxlength="250" value="<%= property?.Contato || '' %>"></label>
+      <label>Telefone do contato<input name="contactPhone" type="tel" maxlength="250" value="<%= property?.Fone_Contato || '' %>"></label>
+      <label>Localização<input name="location" maxlength="250" value="<%= property?.Localizacao || '' %>"></label>
+      <% if (existing) { %>
+        <label>Situação
+          <select name="active">
+            <option value="1" <%= property.Ativo ? 'selected' : '' %>>Ativa</option>
+            <option value="0" <%= property.Ativo ? '' : 'selected' %>>Inativa</option>
+          </select>
+        </label>
+      <% } %>
+      <div class="property-form-actions"><button class="primary-button" type="submit"><%= existing ? 'Salvar alterações' : 'Criar propriedade' %></button></div>
+    </form>
+  </section>
+<% } else if (tab === 'atividades') { %>
+  <section class="property-panel">
+    <div class="panel-heading"><div><h2>Atividades da Propriedade</h2><p class="muted">Atividades selecionadas e safras desta propriedade.</p></div></div>
+    <% if (property.Ativo && activityOptions.length && seasonOptions.length) { %>
+      <form method="post" action="<%= propertyBasePath %>/<%= property.idPropriedade %>/atividades" class="property-child-form property-activity-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="moduleOrigin" value="<%= moduleOrigin %>">
+        <label>Atividades<select name="activityId" required><option value="">Selecione</option><% activityOptions.forEach((activity) => { %><option value="<%= activity.idAtividade %>" data-livestock="<%= activity.Pecuaria %>"><%= activity.Descricao %></option><% }) %></select></label>
+        <label>Safra ou período<select name="seasonId" required><option value="">Selecione</option><% seasonOptions.forEach((season) => { %><option value="<%= season.idSafraPeriodo %>"><%= season.Descricao %></option><% }) %></select></label>
+        <label>Área utilizada<input type="number" min="0" step="any" name="areaUsed"></label>
+        <label>Unidade de área<select name="areaUnitId"><option value="">Selecione</option><% areaUnits.filter((unit) => unit.Ativo).forEach((unit) => { %><option value="<%= unit.idUnidadeArea %>"><%= unit.Nome %> (<%= unit.Sigla %>)</option><% }) %></select></label>
+        <label data-coverage-field hidden>Idade de cobertura (meses)<input type="number" min="0" step="any" name="coverageAge"></label>
+        <label>Descrição<input name="description" maxlength="500"></label>
+        <button class="primary-button" type="submit">Adicionar atividade</button>
+      </form>
+    <% } else if (!property.Ativo) { %>
+      <p class="empty-state">A propriedade está inativa; reative-a para adicionar atividades.</p>
+    <% } else { %>
+      <p class="empty-state">Cadastre uma atividade do módulo atual e uma Safra ativa nas Configurações antes de vincular a esta propriedade.</p>
+    <% } %>
+    <% if (activities.length) { %>
+      <div class="table-scroll property-table-wrap">
+        <table class="users-table property-child-table">
+          <thead><tr><th>Atividade</th><th>Safra/período</th><th>Área</th><% if (activities.some((activity) => activity.AtividadePecuaria === 1)) { %><th>Idade de cobertura (meses)</th><% } %><th>Descrição</th><th>Situação</th><th>Ações</th></tr></thead>
+          <tbody>
+            <% activities.forEach((activity) => { %>
+              <tr data-editable-row data-activity-row>
+                <td>
+                  <select form="update-activity-<%= activity.idAtividadePropriedade %>" name="activityId" aria-label="Atividade">
+                    <% activityOptions.forEach((option) => { %><option value="<%= option.idAtividade %>" data-livestock="<%= option.Pecuaria %>" <%= activity.Atividade_idAtividade === option.idAtividade ? 'selected' : '' %>><%= option.Descricao %></option><% }) %>
+                    <% if (!activityOptions.some((option) => option.idAtividade === activity.Atividade_idAtividade)) { %><option value="<%= activity.Atividade_idAtividade %>" data-livestock="<%= activity.AtividadePecuaria %>" selected><%= activity.AtividadeNome %> (Inativa)</option><% } %>
+                  </select>
+                </td>
+                <td>
+                  <select form="update-activity-<%= activity.idAtividadePropriedade %>" name="seasonId" aria-label="Safra">
+                    <% seasonOptions.forEach((option) => { %><option value="<%= option.idSafraPeriodo %>" <%= activity.SafraPeriodo_idSafraPeriodo === option.idSafraPeriodo ? 'selected' : '' %>><%= option.Descricao %></option><% }) %>
+                    <% if (!seasonOptions.some((option) => option.idSafraPeriodo === activity.SafraPeriodo_idSafraPeriodo)) { %><option value="<%= activity.SafraPeriodo_idSafraPeriodo %>" selected><%= activity.SafraNome %> (Inativa)</option><% } %>
+                  </select>
+                </td>
+                <td><input form="update-activity-<%= activity.idAtividadePropriedade %>" name="areaUsed" type="number" min="0" step="any" value="<%= activity.AreaUtilizada ?? '' %>" aria-label="Área utilizada"></td>
+                <% if (activities.some((item) => item.AtividadePecuaria === 1)) { %>
+                  <td data-coverage-cell <%= activity.AtividadePecuaria === 1 ? '' : 'hidden' %>><input form="update-activity-<%= activity.idAtividadePropriedade %>" name="coverageAge" type="number" min="0" step="any" value="<%= activity.IdadeCobertura ?? '' %>" aria-label="Idade de cobertura"></td>
+                <% } %>
+                <td><input form="update-activity-<%= activity.idAtividadePropriedade %>" name="description" maxlength="500" value="<%= activity.Descricao || '' %>" aria-label="Descrição"></td>
+                <td><select form="update-activity-<%= activity.idAtividadePropriedade %>" name="active" aria-label="Situação"><option value="1" <%= activity.Ativo ? 'selected' : '' %>>Ativa</option><option value="0" <%= activity.Ativo ? '' : 'selected' %>>Inativa</option></select></td>
+                <td class="user-actions">
+                  <form id="update-activity-<%= activity.idAtividadePropriedade %>" data-row-update method="post" action="<%= propertyBasePath %>/<%= property.idPropriedade %>/atividades/<%= activity.idAtividadePropriedade %>/atualizar"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="moduleOrigin" value="<%= moduleOrigin %>"></form>
+                  <button class="small-button" type="button" data-edit-start>Editar</button>
+                  <button class="small-button" form="update-activity-<%= activity.idAtividadePropriedade %>" type="submit" data-edit-save hidden>Salvar</button>
+                  <button class="small-button" type="button" data-edit-cancel hidden>Cancelar</button>
+                  <form method="post" action="<%= propertyBasePath %>/<%= property.idPropriedade %>/atividades/<%= activity.idAtividadePropriedade %>/excluir" data-confirm="Excluir esta atividade da propriedade?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="moduleOrigin" value="<%= moduleOrigin %>"><button class="small-button danger-button" type="submit">Excluir</button></form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %><p class="empty-state">Nenhuma atividade vinculada a esta propriedade.</p><% } %>
+  </section>
+<% } else if (tab === 'talhoes') { %>
+  <section class="property-panel">
+    <div class="panel-heading"><div><h2>Talhões</h2><p class="muted">Divisões da área produtiva da propriedade.</p></div></div>
+    <% if (property.Ativo) { %>
+      <form method="post" action="<%= propertyBasePath %>/<%= property.idPropriedade %>/talhoes" class="property-child-form talhao-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="moduleOrigin" value="<%= moduleOrigin %>">
+        <label>Descrição do talhão<input name="description" required minlength="2" maxlength="120"></label>
+        <label>Área<input type="number" name="area" min="0" step="any" required></label>
+        <label>Unidade de área<select name="areaUnitId"><option value="">Selecione</option><% areaUnits.filter((unit) => unit.Ativo).forEach((unit) => { %><option value="<%= unit.idUnidadeArea %>"><%= unit.Nome %> (<%= unit.Sigla %>)</option><% }) %></select></label>
+        <button class="primary-button" type="submit">Adicionar talhão</button>
+      </form>
+    <% } else { %><p class="empty-state">A propriedade está inativa; reative-a para adicionar talhões.</p><% } %>
+    <% if (talhoes.length) { %>
+      <div class="table-scroll property-table-wrap">
+        <table class="users-table property-child-table">
+          <thead><tr><th>Descrição</th><th>Área</th><th>Unidade de área</th><th>Situação</th><th>Ações</th></tr></thead>
+          <tbody>
+            <% talhoes.forEach((talhao) => { %>
+              <tr data-editable-row>
+                <td><input form="update-talho-<%= talhao.idTalhaoArea %>" name="description" value="<%= talhao.Descricao %>" required maxlength="120" aria-label="Descrição"></td>
+                <td><input form="update-talho-<%= talhao.idTalhaoArea %>" name="area" type="number" min="0" step="any" value="<%= talhao.Area %>" required aria-label="Área"></td>
+                <td>
+                  <select form="update-talho-<%= talhao.idTalhaoArea %>" name="areaUnitId" aria-label="Unidade de área">
+                    <option value="">Selecione</option>
+                    <% areaUnits.forEach((unit) => { %><option value="<%= unit.idUnidadeArea %>" <%= talhao.UnidadeArea_idUnidadeArea === unit.idUnidadeArea ? 'selected' : '' %> <%= !unit.Ativo && talhao.UnidadeArea_idUnidadeArea !== unit.idUnidadeArea ? 'disabled' : '' %>><%= unit.Nome %> (<%= unit.Sigla %>)<%= unit.Ativo ? '' : ' (Inativa)' %></option><% }) %>
+                  </select>
+                </td>
+                <td><select form="update-talho-<%= talhao.idTalhaoArea %>" name="active" aria-label="Situação"><option value="1" <%= talhao.Ativo ? 'selected' : '' %>>Ativo</option><option value="0" <%= talhao.Ativo ? '' : 'selected' %>>Inativo</option></select></td>
+                <td class="user-actions">
+                  <form id="update-talho-<%= talhao.idTalhaoArea %>" data-row-update method="post" action="<%= propertyBasePath %>/<%= property.idPropriedade %>/talhoes/<%= talhao.idTalhaoArea %>/atualizar"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="moduleOrigin" value="<%= moduleOrigin %>"></form>
+                  <button class="small-button" type="button" data-edit-start>Editar</button>
+                  <button class="small-button" form="update-talho-<%= talhao.idTalhaoArea %>" type="submit" data-edit-save hidden>Salvar</button>
+                  <button class="small-button" type="button" data-edit-cancel hidden>Cancelar</button>
+                  <form method="post" action="<%= propertyBasePath %>/<%= property.idPropriedade %>/talhoes/<%= talhao.idTalhaoArea %>/excluir" data-confirm="Excluir este talhão?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="moduleOrigin" value="<%= moduleOrigin %>"><button class="small-button danger-button" type="submit">Excluir</button></form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %><p class="empty-state">Nenhum talhão cadastrado.</p><% } %>
+  </section>
+<% } %>
+<%- include('partials/footer') %>

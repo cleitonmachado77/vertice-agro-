@@ -1,0 +1,68 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="/modulos/admin">&larr; Administrador</a>
+    <p class="eyebrow">CADASTRO ADMINISTRATIVO</p>
+    <h1>Cooperativas e associações</h1>
+  </div>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<section class="user-create-section">
+  <h2>Nova associação</h2>
+  <form method="post" action="/admin/associacoes" class="user-create-form association-create-form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Nome<input name="name" required minlength="2" maxlength="150"></label>
+    <label>WhatsApp<input name="whatsapp" type="tel" maxlength="250"></label>
+    <label>E-mail<input name="email" type="email" maxlength="250"></label>
+    <label>Contato<input name="contact" maxlength="250"></label>
+    <label>Telefone do contato<input name="contactPhone" type="tel" maxlength="250"></label>
+    <label>Endereço<input name="address" maxlength="250"></label>
+    <button class="primary-button" type="submit">Criar associação</button>
+  </form>
+</section>
+<section class="user-list-section">
+  <h2>Associações cadastradas</h2>
+  <% if (associations.length) { %>
+    <div class="table-scroll">
+      <table class="users-table associations-table">
+        <thead>
+          <tr><th>Nome</th><th>WhatsApp</th><th>E-mail</th><th>Contato</th><th>Telefone</th><th>Endereço</th><th>Vínculos</th><th>Situação</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+          <% associations.forEach((association) => { %>
+            <tr data-editable-row>
+              <td><input form="update-association-<%= association.idCooperativaAssociacao %>" name="name" value="<%= association.Nome %>" required maxlength="150" aria-label="Nome da associação"></td>
+              <td><input form="update-association-<%= association.idCooperativaAssociacao %>" name="whatsapp" value="<%= association.Fone_Whats || '' %>" type="tel" aria-label="WhatsApp"></td>
+              <td><input form="update-association-<%= association.idCooperativaAssociacao %>" name="email" value="<%= association.Email || '' %>" type="email" aria-label="E-mail"></td>
+              <td><input form="update-association-<%= association.idCooperativaAssociacao %>" name="contact" value="<%= association.Contato || '' %>" aria-label="Contato"></td>
+              <td><input form="update-association-<%= association.idCooperativaAssociacao %>" name="contactPhone" value="<%= association.Fone_Contato || '' %>" type="tel" aria-label="Telefone do contato"></td>
+              <td><input form="update-association-<%= association.idCooperativaAssociacao %>" name="address" value="<%= association.Endereco || '' %>" aria-label="Endereço"></td>
+              <td class="association-count"><%= association.TotalVinculos %></td>
+              <td>
+                <select form="update-association-<%= association.idCooperativaAssociacao %>" name="active" aria-label="Situação da associação">
+                  <option value="1" <%= association.Ativo ? 'selected' : '' %>>Ativa</option>
+                  <option value="0" <%= association.Ativo ? '' : 'selected' %>>Inativa</option>
+                </select>
+              </td>
+              <td class="user-actions">
+                <form id="update-association-<%= association.idCooperativaAssociacao %>" data-row-update method="post" action="/admin/associacoes/<%= association.idCooperativaAssociacao %>/atualizar">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                </form>
+                <button class="small-button" type="button" data-edit-start>Editar</button>
+                <button class="small-button" form="update-association-<%= association.idCooperativaAssociacao %>" type="submit" data-edit-save hidden>Salvar</button>
+                <button class="small-button" type="button" data-edit-cancel hidden>Cancelar</button>
+                <form method="post" action="/admin/associacoes/<%= association.idCooperativaAssociacao %>/excluir" data-confirm="Excluir esta associação?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="small-button danger-button" type="submit">Excluir</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <p class="empty-state">Nenhuma associação cadastrada.</p>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

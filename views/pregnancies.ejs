@@ -1,0 +1,71 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="/modulos/pecuaria">&larr; Pecuária de Leite</a>
+    <p class="eyebrow">REPRODUÇÃO · ACOMPANHAMENTO</p>
+    <h1><%= pageTitle %></h1>
+  </div>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<% if (view === 'available') { %>
+<section class="user-list-section property-list-section">
+  <h2>Fêmeas vazias</h2>
+  <% if (heifersNearCoverage.length) { %>
+    <p class="empty-state"><%= heifersNearCoverage.length %> <%= heifersNearCoverage.length === 1 ? 'novilha se aproxima' : 'novilhas se aproximam' %> da idade de cobertura nos próximos 30 dias.</p>
+  <% } %>
+  <% if (availableFemales.length) { %>
+    <div class="table-scroll">
+      <table class="users-table animal-list-table">
+        <thead><tr><th>Brinco</th><th>Propriedade</th><th>Categoria</th><th>Idade</th><th>Cobertura</th><th>Ação</th></tr></thead>
+        <tbody>
+          <% availableFemales.forEach((animal) => { %>
+            <tr>
+              <td><strong><%= animal.Brinco %></strong></td>
+              <td><%= animal.PropriedadeNome %><br><small><%= animal.ProdutorNome %></small></td>
+              <td><%= animal.CategoriaNome || '—' %></td>
+              <td><%= animal.Idade %></td>
+              <td><%= animal.DiasParaCobertura === null ? 'Idade não configurada' : animal.DiasParaCobertura <= 0 ? 'Idade atingida' : `Em ${animal.DiasParaCobertura} dias` %></td>
+              <td class="user-actions">
+                <% if (animal.PodeRegistrarPrenhez) { %><a class="small-button" href="/pecuaria/animais/<%= animal.idAnimal %>/prenhez/nova">Registrar prenhez</a><% } else { %><span class="muted">Aguardar idade de cobertura</span><% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %><p class="empty-state">Não há fêmeas vazias disponíveis para cobertura.</p><% } %>
+</section>
+<% } else { %>
+<section class="user-list-section property-list-section">
+  <h2>Confirmação e parto</h2>
+  <% if (pregnancies.length) { %>
+    <div class="table-scroll">
+      <table class="users-table animal-list-table">
+        <thead><tr><th>Mãe</th><th>Propriedade</th><th>Tipo</th><th>Pai</th><th>Data da prenhez</th><th>Previsão do parto</th><th>Status</th><th>Ações</th></tr></thead>
+        <tbody>
+          <% pregnancies.forEach((pregnancy) => { %>
+            <tr>
+              <td><strong><%= pregnancy.MotherTag %></strong></td>
+              <td><%= pregnancy.PropriedadeNome %><br><small><%= pregnancy.ProdutorNome %></small></td>
+              <td><%= pregnancy.MethodName || '—' %></td>
+              <td><%= pregnancy.FatherTag || 'Não informado' %></td>
+              <td><%= formatDate(pregnancy.DataPrenhez) %></td>
+              <td><%= formatDate(pregnancy.DataParto) %></td>
+              <td><span class="status-chip <%= pregnancy.Status === 'Parto Realizado' ? 'status-active' : 'status-inactive' %>"><%= pregnancy.Status %></span></td>
+              <td class="user-actions">
+                <% if (pregnancy.Status === 'Prenhez Pendente') { %>
+                  <a class="small-button" href="/pecuaria/prenhezes/<%= pregnancy.idPrenhez %>/previsao">Confirmar e prever parto</a>
+                <% } else if (pregnancy.Status === 'Prenhez Confirmada') { %>
+                  <a class="small-button" href="/pecuaria/prenhezes/<%= pregnancy.idPrenhez %>/previsao">Ajustar previsão</a>
+                  <a class="small-button" href="/pecuaria/prenhezes/<%= pregnancy.idPrenhez %>/parto">Registrar parto</a>
+                <% } else { %><span class="muted">Concluído</span><% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %><p class="empty-state">Nenhum registro de prenhez para confirmar ou realizar parto.</p><% } %>
+</section>
+<% } %>
+<%- include('partials/footer') %>

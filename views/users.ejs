@@ -1,0 +1,92 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="/modulos/admin">&larr; Administrador</a>
+    <p class="eyebrow">ACESSO E PERFIS</p>
+    <h1>Usuários</h1>
+  </div>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<section class="user-create-section">
+  <h2>Novo usuário</h2>
+  <form method="post" action="/admin/usuarios" class="user-create-form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Nome completo<input name="name" required minlength="2" maxlength="120"></label>
+    <label>Usuário<input name="login" required minlength="3" maxlength="50" autocomplete="off"></label>
+    <label>Perfil
+      <select name="profile" required>
+        <option value="">Selecione</option>
+        <option value="Administrador">Administrador</option>
+        <option value="Gestor">Gestor</option>
+        <option value="Produtor">Produtor</option>
+      </select>
+    </label>
+    <label>Associação
+      <select name="associationId">
+        <option value="">Sem associação</option>
+        <% associations.forEach((association) => { %>
+          <option value="<%= association.idCooperativaAssociacao %>" <%= association.Ativo ? '' : 'disabled' %>><%= association.Nome %><%= association.Ativo ? '' : ' (Inativa)' %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Senha<input type="password" name="password" required minlength="12" autocomplete="new-password"></label>
+    <button class="primary-button" type="submit">Criar usuário</button>
+  </form>
+</section>
+<section class="user-list-section">
+  <h2>Usuários cadastrados</h2>
+  <% if (users.length) { %>
+    <div class="table-scroll">
+      <table class="users-table">
+        <thead>
+          <tr><th>Nome</th><th>Usuário</th><th>Perfil</th><th>Situação</th><th>Associação</th><th>Nova senha</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+          <% users.forEach((account) => { %>
+            <tr data-editable-row>
+              <td><input form="update-<%= account.idUsuario %>" name="name" value="<%= account.Nome %>" required minlength="2" maxlength="120" aria-label="Nome de <%= account.Login %>"></td>
+              <td><input form="update-<%= account.idUsuario %>" name="login" value="<%= account.Login %>" required minlength="3" maxlength="50" aria-label="Usuário de <%= account.Login %>"></td>
+              <td>
+                <select form="update-<%= account.idUsuario %>" name="profile" aria-label="Perfil de <%= account.Login %>">
+                  <% ['Administrador', 'Gestor', 'Produtor'].forEach((profile) => { %>
+                    <option value="<%= profile %>" <%= account.Perfil === profile ? 'selected' : '' %>><%= profile %></option>
+                  <% }) %>
+                </select>
+              </td>
+              <td>
+                <select form="update-<%= account.idUsuario %>" name="status" aria-label="Situação de <%= account.Login %>">
+                  <option value="Ativo" <%= account.Situacao === 'Ativo' ? 'selected' : '' %>>Ativo</option>
+                  <option value="Inativo" <%= account.Situacao === 'Inativo' ? 'selected' : '' %>>Inativo</option>
+                </select>
+              </td>
+              <td>
+                <select form="update-<%= account.idUsuario %>" name="associationId" aria-label="Associação de <%= account.Login %>">
+                  <option value="">Sem associação</option>
+                  <% associations.forEach((association) => { %>
+                    <option value="<%= association.idCooperativaAssociacao %>" <%= Number(account.AssociationID) === association.idCooperativaAssociacao ? 'selected' : '' %> <%= !association.Ativo && Number(account.AssociationID) !== association.idCooperativaAssociacao ? 'disabled' : '' %>><%= association.Nome %><%= association.Ativo ? '' : ' (Inativa)' %></option>
+                  <% }) %>
+                </select>
+              </td>
+              <td><input form="update-<%= account.idUsuario %>" type="password" name="password" minlength="12" autocomplete="new-password" aria-label="Nova senha de <%= account.Login %>"></td>
+              <td class="user-actions">
+                <form id="update-<%= account.idUsuario %>" data-row-update method="post" action="/admin/usuarios/<%= account.idUsuario %>/atualizar">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                </form>
+                <button class="small-button" type="button" data-edit-start>Editar</button>
+                <button class="small-button" form="update-<%= account.idUsuario %>" type="submit" data-edit-save hidden>Salvar</button>
+                <button class="small-button" type="button" data-edit-cancel hidden>Cancelar</button>
+                <form method="post" action="/admin/usuarios/<%= account.idUsuario %>/excluir" data-confirm="Excluir este usuário?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="small-button danger-button" type="submit">Excluir</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <p class="empty-state">Nenhum usuário cadastrado.</p>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

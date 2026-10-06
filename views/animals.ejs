@@ -1,0 +1,63 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="/modulos/pecuaria">&larr; Pecuária de Leite</a>
+    <p class="eyebrow">REBANHO · CADASTRO</p>
+    <h1>Animais</h1>
+  </div>
+  <% if (activities.length) { %><a class="primary-button" href="/pecuaria/animais/novo">Novo animal <span aria-hidden="true">+</span></a><% } %>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<form method="get" action="/pecuaria/animais" class="planning-filters">
+  <label>Propriedade
+    <select name="propertyId"><option value="">Todas disponíveis</option><% properties.forEach((property) => { %><option value="<%= property.idPropriedade %>" <%= propertyId === property.idPropriedade ? 'selected' : '' %>><%= property.Nome %> · <%= property.ProdutorNome %></option><% }) %></select>
+  </label>
+  <label>Situação
+    <select name="herd"><option value="">Todas</option><option value="1" <%= herd === '1' ? 'selected' : '' %>>No rebanho</option><option value="0" <%= herd === '0' ? 'selected' : '' %>>Fora do rebanho</option></select>
+  </label>
+  <button class="primary-button" type="submit">Filtrar</button>
+</form>
+<section class="user-list-section property-list-section">
+  <h2>Animais cadastrados</h2>
+  <% if (animals.length) { %>
+    <div class="table-scroll">
+      <table class="users-table animal-list-table">
+        <thead><tr><th>Brinco</th><th>Propriedade</th><th>Atividade</th><th>Categoria</th><th>Sexo</th><th>Nascimento</th><th>Idade</th><th>Primeiro parto</th><th>Status reprodutivo</th><th>Situação</th><th>Saída</th><th>Ações</th></tr></thead>
+        <tbody>
+          <% animals.forEach((animal) => { %>
+            <tr>
+              <td><strong><%= animal.Brinco %></strong></td>
+              <td><%= animal.PropriedadeNome %><br><small><%= animal.ProdutorNome %> · <%= animal.AssociacaoNome %></small></td>
+              <td><%= animal.AtividadeNome %></td>
+              <td><%= animal.CategoriaNome || '—' %></td>
+              <td><%= animal.Sexo === 'F' ? 'Fêmea' : 'Macho' %></td>
+              <td><%= formatDate(animal.Nascimento) %></td>
+              <td><%= animal.Idade %></td>
+              <td><%= animal.Sexo === 'F' ? formatDate(animal.PrimeiroParto) : '—' %></td>
+              <td><%= animal.StatusReprodutivo || (animal.Sexo === 'F' ? 'Vazia' : 'Não aplicável') %></td>
+              <td><span class="status-chip <%= animal.PertenceRebanho ? 'status-active' : 'status-inactive' %>"><%= animal.PertenceRebanho ? 'No rebanho' : 'Fora do rebanho' %></span></td>
+              <td><%= formatDate(animal.DataSaida) %><% if (animal.MotivoSaida) { %><br><small><%= animal.MotivoSaida %></small><% } %></td>
+              <td class="user-actions">
+                <% if (animal.Sexo === 'F') { %>
+                  <% if (animal.Prenhez_idPrenhez) { %>
+                    <a class="small-button" href="/pecuaria/prenhezes/<%= animal.Prenhez_idPrenhez %>">Ver prenhez</a>
+                  <% } else if (animal.StatusReprodutivo === 'Vazia' && animal.PodeRegistrarPrenhez) { %>
+                    <a class="small-button" href="/pecuaria/animais/<%= animal.idAnimal %>/prenhez/nova">Registrar prenhez</a>
+                  <% } else if (animal.StatusReprodutivo === 'Vazia') { %><span class="muted">Aguardar idade de cobertura</span><% } %>
+                <% } %>
+                <a class="small-button" href="/pecuaria/animais/<%= animal.idAnimal %>">Editar</a>
+                <form method="post" action="/pecuaria/animais/<%= animal.idAnimal %>/excluir" data-confirm="Excluir este animal? Registros de lactação ou reprodução vinculados impedem a exclusão.">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="small-button danger-button" type="submit">Excluir</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <p class="empty-state"><%= activities.length ? 'Nenhum animal corresponde aos filtros selecionados.' : 'Não há atividades pecuárias ativas disponíveis nas propriedades do seu perfil.' %></p>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

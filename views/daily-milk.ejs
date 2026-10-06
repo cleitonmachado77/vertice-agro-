@@ -1,0 +1,55 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="/modulos/pecuaria">&larr; Pecuária de Leite</a>
+    <p class="eyebrow">REBANHO · PRODUÇÃO LEITEIRA</p>
+    <h1>Produção Diária</h1>
+  </div>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<% if (success) { %><p class="form-success" role="status"><%= success %></p><% } %>
+<section class="user-list-section property-list-section" id="lancamentos">
+  <div class="lactation-section-heading">
+    <h2>Pesagem de leite</h2>
+    <form class="lactation-date-controls" method="get" action="/pecuaria/producao-diaria#lancamentos">
+      <label>Propriedade
+        <select name="propertyId">
+          <option value="">Todas disponíveis</option>
+          <% properties.forEach((property) => { %>
+            <option value="<%= property.idPropriedade %>" <%= propertyId === property.idPropriedade ? 'selected' : '' %>><%= property.Nome %> · <%= property.ProdutorNome %></option>
+          <% }) %>
+        </select>
+      </label>
+      <label>Data da pesagem<input type="date" name="date" required max="<%= new Date().toISOString().slice(0, 10) %>" value="<%= productionDate %>"></label>
+      <button class="secondary-button" type="submit">Carregar dia</button>
+    </form>
+  </div>
+  <% if (dailyLactations.length) { %>
+    <form method="post" action="/pecuaria/producao-diaria/lancamentos">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="date" value="<%= productionDate %>">
+      <% if (propertyId) { %><input type="hidden" name="propertyId" value="<%= propertyId %>"><% } %>
+      <div class="table-scroll">
+        <table class="users-table lactation-entry-table">
+          <thead><tr><th>Brinco</th><th>Propriedade</th><th>Produtor</th><th>Início da lactação</th><th>Leite (litros)</th></tr></thead>
+          <tbody><% dailyLactations.forEach((lactation) => { %>
+            <tr>
+              <td><a href="/pecuaria/animais/<%= lactation.idAnimal %>"><strong><%= lactation.Brinco || `Animal ${lactation.idAnimal}` %></strong></a></td>
+              <td><%= lactation.PropriedadeNome %></td>
+              <td><%= lactation.ProdutorNome %></td>
+              <td><%= formatDate(lactation.Inicio) %></td>
+              <td>
+                <input type="hidden" name="lactationIds" value="<%= lactation.idLactacoes %>">
+                <input type="number" name="quantities" min="0" step="0.01" inputmode="decimal" value="<%= lactation.Quantidade ?? '' %>" aria-label="Litros produzidos pela vaca <%= lactation.Brinco || lactation.idAnimal %>">
+              </td>
+            </tr>
+          <% }) %></tbody>
+        </table>
+      </div>
+      <div class="property-form-actions livestock-form-actions">
+        <button class="primary-button" type="submit">Salvar lançamentos</button>
+      </div>
+    </form>
+  <% } else { %><p class="empty-state">Não há vacas em lactação para lançar na propriedade e data selecionadas.</p><% } %>
+</section>
+<%- include('partials/footer') %>

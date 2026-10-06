@@ -1,0 +1,63 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="/pecuaria/animais">&larr; Animais</a>
+    <p class="eyebrow">PECUÁRIA DE LEITE</p>
+    <h1><%= existing ? `Animal ${animal.Brinco}` : 'Novo animal' %></h1>
+  </div>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<form class="property-form livestock-form" data-animal-form method="post" action="<%= existing ? `/pecuaria/animais/${animal.idAnimal}/atualizar` : '/pecuaria/animais' %>">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <label>Propriedade
+    <select name="propertyId" required>
+      <option value="">Selecione</option>
+      <% properties.forEach((property) => { %><option value="<%= property.idPropriedade %>" <%= Number(formValues.propertyId ?? animal?.Propriedade_idPropriedade) === property.idPropriedade ? 'selected' : '' %>><%= property.Nome %> · <%= property.ProdutorNome %></option><% }) %>
+    </select>
+  </label>
+  <label>Atividade pecuária
+    <select name="activityPropertyId" required>
+      <option value="">Selecione</option>
+      <% activities.forEach((activity) => { %><option value="<%= activity.idAtividadePropriedade %>" data-property-id="<%= activity.Propriedade_idPropriedade %>" <%= Number(formValues.activityPropertyId ?? animal?.AtividadePropriedade_idAtividadePropriedade) === activity.idAtividadePropriedade ? 'selected' : '' %>><%= activity.PropriedadeNome %> · <%= activity.ActivityDescription %></option><% }) %>
+    </select>
+  </label>
+  <label>Brinco
+    <input name="tag" maxlength="80" required value="<%= formValues.tag ?? animal?.Brinco ?? '' %>">
+  </label>
+  <label>Sexo
+    <select name="sex" required>
+      <option value="">Selecione</option>
+      <option value="F" <%= (formValues.sex ?? animal?.Sexo) === 'F' ? 'selected' : '' %>>Fêmea</option>
+      <option value="M" <%= (formValues.sex ?? animal?.Sexo) === 'M' ? 'selected' : '' %>>Macho</option>
+    </select>
+  </label>
+  <label>Categoria
+    <select name="categoryId" required>
+      <option value="">Selecione</option>
+      <% categories.forEach((category) => { %><option value="<%= category.idCategoria %>" data-sex="<%= category.Sexo %>" <%= Number(formValues.categoryId ?? animal?.Categoria_idCategoria) === category.idCategoria ? 'selected' : '' %>><%= category.Nome %> · <%= category.Sexo === 'F' ? 'Fêmea' : 'Macho' %></option><% }) %>
+    </select>
+  </label>
+  <label>Data de nascimento
+    <input type="date" name="birthDate" required value="<%= formValues.birthDate ?? animal?.Nascimento ?? '' %>">
+  </label>
+  <label data-first-calving-field>Data do primeiro parto
+    <input type="date" name="firstCalving" value="<%= formValues.firstCalving ?? animal?.PrimeiroParto ?? '' %>">
+  </label>
+  <label class="animal-herd-toggle"><input type="checkbox" name="belongsToHerd" value="1" <%= String(formValues.belongsToHerd ?? animal?.PertenceRebanho ?? '1') === '1' ? 'checked' : '' %>> Pertence ao rebanho</label>
+  <fieldset class="animal-exit-fields" data-animal-exit-fields>
+    <legend>Saída do rebanho</legend>
+    <input type="hidden" name="exitDate" value="<%= formValues.exitDate ?? animal?.DataSaida ?? '' %>">
+    <label>Motivo
+      <select name="exitReasonId">
+        <option value="">Selecione</option>
+        <% exitReasons.forEach((reason) => { %><option value="<%= reason.idMotivoSaida %>" <%= Number(formValues.exitReasonId ?? animal?.MotivoSaida_idMotivoSaida) === reason.idMotivoSaida ? 'selected' : '' %>><%= reason.Descricao %></option><% }) %>
+      </select>
+    </label>
+    <label>Motivo não cadastrado<input name="exitReason" maxlength="250" value="<%= formValues.exitReason ?? animal?.Motivo ?? '' %>"></label>
+  </fieldset>
+  <div class="property-form-actions livestock-form-actions">
+    <button class="primary-button" type="submit"><%= existing ? 'Salvar alterações' : 'Cadastrar animal' %></button>
+    <a class="secondary-button" href="/pecuaria/animais">Cancelar</a>
+  </div>
+</form>
+<%- include('partials/footer') %>

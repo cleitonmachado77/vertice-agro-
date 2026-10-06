@@ -1,0 +1,88 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="/admin/configuracoes">&larr; Configurações</a>
+    <p class="eyebrow">GESTÃO DE PRODUÇÃO</p>
+    <h1><%= catalog.title %></h1>
+  </div>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<section class="user-create-section">
+  <h2>Novo registro</h2>
+  <form method="post" action="/admin/configuracoes/<%= catalog.slug %>" class="user-create-form catalog-form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <% catalog.fields.forEach((field) => { %>
+      <% if (field.type === 'checkbox') { %>
+        <label class="catalog-checkbox-label"><input class="catalog-checkbox" type="checkbox" name="<%= field.name %>" value="1"><span><%= field.label %></span></label>
+      <% } else if (field.type === 'select') { %>
+        <label><%= field.label %>
+          <select name="<%= field.name %>" required>
+            <option value="">Selecione</option>
+            <% options[field.name].forEach((option) => { %>
+              <option value="<%= option.id %>" <%= option.Ativo ? '' : 'disabled' %>><%= option.label %><%= option.Ativo ? '' : ' (Inativo)' %></option>
+            <% }) %>
+          </select>
+        </label>
+      <% } else if (field.type === 'textarea') { %>
+        <label><%= field.label %><textarea name="<%= field.name %>" maxlength="<%= field.maxLength %>" <%= field.required === false ? '' : 'required' %>></textarea></label>
+      <% } else { %>
+        <label><%= field.label %><input name="<%= field.name %>" type="<%= field.type %>" <%= field.min !== undefined ? `min="${field.min}"` : '' %> <%= field.integer ? 'step="1"' : field.type === 'number' ? 'step="any"' : '' %> <%= field.maxLength ? `maxlength="${field.maxLength}"` : '' %> <%= field.required === false ? '' : 'required' %>></label>
+      <% } %>
+    <% }) %>
+    <button class="primary-button" type="submit">Criar registro</button>
+  </form>
+</section>
+<section class="user-list-section">
+  <h2>Registros cadastrados</h2>
+  <% if (records.length) { %>
+    <div class="table-scroll">
+      <table class="users-table catalog-table">
+        <thead><tr><% catalog.fields.forEach((field) => { %><th><%= field.label %></th><% }) %><th>Situação</th><th>Ações</th></tr></thead>
+        <tbody>
+          <% records.forEach((record) => { %>
+            <tr data-editable-row>
+              <% catalog.fields.forEach((field) => { %>
+                <td>
+                  <% if (field.type === 'checkbox') { %>
+                    <input class="catalog-checkbox" form="update-<%= catalog.slug %>-<%= record.id %>" type="checkbox" name="<%= field.name %>" value="1" <%= record[field.column] ? 'checked' : '' %> aria-label="<%= field.label %>">
+                  <% } else if (field.type === 'select') { %>
+                    <select form="update-<%= catalog.slug %>-<%= record.id %>" name="<%= field.name %>" aria-label="<%= field.label %>">
+                      <% options[field.name].forEach((option) => { %>
+                        <option value="<%= option.id %>" <%= Number(record[field.column]) === option.id ? 'selected' : '' %> <%= !option.Ativo && Number(record[field.column]) !== option.id ? 'disabled' : '' %>><%= option.label %><%= option.Ativo ? '' : ' (Inativo)' %></option>
+                      <% }) %>
+                    </select>
+                  <% } else if (field.type === 'textarea') { %>
+                    <textarea form="update-<%= catalog.slug %>-<%= record.id %>" name="<%= field.name %>" maxlength="<%= field.maxLength %>" aria-label="<%= field.label %>"><%= record[field.column] || '' %></textarea>
+                  <% } else { %>
+                    <input form="update-<%= catalog.slug %>-<%= record.id %>" name="<%= field.name %>" type="<%= field.type %>" value="<%= record[field.column] ?? '' %>" <%= field.min !== undefined ? `min="${field.min}"` : '' %> <%= field.integer ? 'step="1"' : field.type === 'number' ? 'step="any"' : '' %> <%= field.maxLength ? `maxlength="${field.maxLength}"` : '' %> <%= field.required === false ? '' : 'required' %> aria-label="<%= field.label %>">
+                  <% } %>
+                </td>
+              <% }) %>
+              <td>
+                <select form="update-<%= catalog.slug %>-<%= record.id %>" name="active" aria-label="Situação">
+                  <option value="1" <%= record.Ativo ? 'selected' : '' %>>Ativo</option>
+                  <option value="0" <%= record.Ativo ? '' : 'selected' %>>Inativo</option>
+                </select>
+              </td>
+              <td class="user-actions">
+                  <form id="update-<%= catalog.slug %>-<%= record.id %>" data-row-update method="post" action="/admin/configuracoes/<%= catalog.slug %>/<%= record.id %>/atualizar">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                </form>
+                  <button class="small-button" type="button" data-edit-start>Editar</button>
+                  <button class="small-button" form="update-<%= catalog.slug %>-<%= record.id %>" type="submit" data-edit-save hidden>Salvar</button>
+                  <button class="small-button" type="button" data-edit-cancel hidden>Cancelar</button>
+                <form method="post" action="/admin/configuracoes/<%= catalog.slug %>/<%= record.id %>/excluir" data-confirm="Excluir este registro?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="small-button danger-button" type="submit">Excluir</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <p class="empty-state">Nenhum registro cadastrado.</p>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

@@ -1,0 +1,19 @@
+{
+  "name": "campobase",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Aplicação responsiva para gestão de propriedades rurais",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --env-file=.env server.js",
+    "dev": "node --env-file=.env --watch server.js"
+  },
+  "dependencies": {
+    "connect-pg-simple": "^10.0.0",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "helmet": "^8.1.0",
+    "pg": "^8.23.1"
+  }
+}

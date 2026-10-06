@@ -1,0 +1,61 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="/modulos/<%= moduleOrigin %>">&larr; <%= moduleOrigin === 'pecuaria' ? 'Pecuária de Leite' : 'Atividades Agrícolas' %></a>
+    <p class="eyebrow">PROPRIEDADES · SAFRAS · ENTREGAS · ATIVIDADES <%= activityLabel.toUpperCase() %></p>
+    <h1>Produções</h1>
+  </div>
+  <% if (availableProperties.length) { %><a class="primary-button" href="<%= moduleBasePath %>/nova">Nova produção <span aria-hidden="true">+</span></a><% } %>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<form method="get" action="<%= moduleBasePath %>" class="planning-filters">
+  <% if (user.Perfil !== 'Produtor') { %>
+    <label>Associação
+      <select name="associationId"><option value="">Todas disponíveis</option><% associations.forEach((association) => { %><option value="<%= association.idCooperativaAssociacao %>" <%= associationId === association.idCooperativaAssociacao ? 'selected' : '' %>><%= association.Nome %></option><% }) %></select>
+    </label>
+  <% } %>
+  <label>Propriedade
+    <select name="propertyId"><option value="">Todas disponíveis</option><% availableProperties.forEach((property) => { %><option value="<%= property.idPropriedade %>" <%= propertyId === property.idPropriedade ? 'selected' : '' %>><%= property.PropriedadeNome %> · <%= property.ProdutorNome %></option><% }) %></select>
+  </label>
+  <label>Produto<select name="productId"><option value="">Todos os produtos</option><% products.forEach((product) => { %><option value="<%= product.idProduto %>" <%= productId === product.idProduto ? 'selected' : '' %>><%= product.Nome %></option><% }) %></select></label>
+  <label>Situação
+    <select name="situation"><option value="">Todas</option><% ['Planejada','Realizada'].forEach((item) => { %><option value="<%= item %>" <%= situation === item ? 'selected' : '' %>><%= item %></option><% }) %></select>
+  </label>
+  <button class="primary-button" type="submit">Aplicar filtros</button>
+</form>
+<section class="planning-summary" aria-label="Totais das produções">
+  <article class="metric-item"><span class="metric-label">Produções</span><strong class="metric-value"><%= Number(totals.Producoes).toLocaleString('pt-BR') %></strong></article>
+  <article class="metric-item metric-accent-1"><span class="metric-label">Previsto</span><strong class="metric-value"><%= Number(totals.Previsto).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) %></strong></article>
+  <article class="metric-item metric-accent-2"><span class="metric-label">Realizado</span><strong class="metric-value"><%= Number(totals.Realizado).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) %></strong></article>
+  <article class="metric-item metric-accent-3"><span class="metric-label">Entregue</span><strong class="metric-value"><%= Number(totals.Entregue).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) %></strong></article>
+</section>
+<section class="user-list-section property-list-section">
+  <h2>Registros de produção</h2>
+  <% if (productions.length) { %>
+    <div class="table-scroll">
+      <table class="users-table production-list-table">
+        <thead><tr><th>IdProducao</th><th>Propriedade</th><th>Atividade / safra</th><% if (moduleOrigin === 'agricultura') { %><th>Talhão</th><th>Área planejada</th><% } %><th>Produto / unidade</th><th>Início</th><th>Previsão de produção</th><th>Previsão</th><th>Realizado</th><th>Situação</th><th>Descrição</th><th>Ações</th></tr></thead>
+        <tbody>
+          <% productions.forEach((production) => { %>
+            <tr>
+              <td><%= production.IdProducao %></td>
+              <td><%= production.PropriedadeNome %><br><small><%= production.ProdutorNome %> · <%= production.AssociacaoNome %></small></td>
+              <td><%= production.AtividadeNome %><br><small><%= production.SafraNome %></small></td>
+              <% if (moduleOrigin === 'agricultura') { %><td><%= production.TalhaoNome || '—' %></td>
+              <td><%= production.AreaPlanejada === null ? '—' : Number(production.AreaPlanejada).toLocaleString('pt-BR', { maximumFractionDigits: 3 }) %></td><% } %>
+              <td><%= production.ProdutoNome %> (<%= production.UnidadeSigla %>)</td>
+              <td><%= formatDate(production.InicioProducao) %></td>
+              <td><%= formatDate(production.PrevisaoProducao) %></td>
+              <td><%= production.Previsao === null ? '—' : Number(production.Previsao).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) %></td>
+              <td><%= production.Realizado === null ? '—' : Number(production.Realizado).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) %></td>
+              <td><span class="status-chip status-active"><%= production.Situacao %></span></td>
+              <td><%= production.Descricao || '—' %></td>
+              <td class="user-actions"><a class="small-button" href="<%= moduleBasePath %>/<%= production.IdProducao %>">Editar</a><a class="small-button" href="<%= moduleBasePath %>/<%= production.IdProducao %>/entregas">Entregas</a></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %><p class="empty-state">Nenhuma produção corresponde aos filtros selecionados.</p><% } %>
+</section>
+<%- include('partials/footer') %>

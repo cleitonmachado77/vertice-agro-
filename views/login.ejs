@@ -1,0 +1,22 @@
+<%- include('partials/header') %>
+<section class="auth-layout login-layout">
+  <div class="auth-aside">
+    <p class="eyebrow">GESTAO RURAL</p>
+    <h1>Da propriedade ao planejamento da cooperativa.</h1>
+    <p class="aside-copy">Uma visão organizada da produção e das pessoas que fazem acontecer.</p>
+    <div class="aside-rule"><span></span><span></span><span></span></div>
+  </div>
+  <div class="auth-panel">
+    <p class="eyebrow">BEM-VINDO DE VOLTA</p>
+    <h2>Acessar Vértice Agro</h2>
+    <p class="muted">Entre com seu usuário e senha.</p>
+    <% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+    <form method="post" action="/login" class="form-stack">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>Usuário<input name="login" autocomplete="username" required autofocus></label>
+      <label>Senha<input type="password" name="password" autocomplete="current-password" required></label>
+      <button class="primary-button" type="submit">Entrar</button>
+    </form>
+  </div>
+</section>
+<%- include('partials/footer') %>

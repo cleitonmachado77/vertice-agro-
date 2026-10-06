@@ -1,0 +1,48 @@
+<aside class="admin-sidebar" aria-label="Navegação administrativa">
+  <a class="admin-nav-home" href="/modulos">&larr; Módulos</a>
+  <p class="admin-nav-title">ADMINISTRADOR</p>
+  <% if (user.Perfil === 'Administrador') { %>
+    <details open>
+      <summary>Cadastros administrativos</summary>
+      <nav>
+        <a class="<%= currentPath === '/admin/usuarios' ? 'is-active' : '' %>" href="/admin/usuarios">Usuários</a>
+        <a class="<%= currentPath === '/admin/localidades' ? 'is-active' : '' %>" href="/admin/localidades">Estados e Municípios</a>
+        <a class="<%= currentPath === '/admin/unidades' ? 'is-active' : '' %>" href="/admin/unidades">Unidades</a>
+      </nav>
+    </details>
+  <% } %>
+  <details open>
+    <summary>Produtores</summary>
+    <nav>
+      <% if (user.Perfil === 'Administrador') { %>
+        <a class="<%= currentPath === '/admin/associacoes' ? 'is-active' : '' %>" href="/admin/associacoes">Cooperativas e Associações</a>
+      <% } %>
+      <a class="<%= currentPath === '/admin/produtores' ? 'is-active' : '' %>" href="/admin/produtores">Cadastro de Produtores</a>
+    </nav>
+  </details>
+  <% if (user.Perfil === 'Administrador' || user.Perfil === 'Gestor') { %>
+    <details open>
+      <summary>Agricultura e compradores</summary>
+      <nav>
+        <a class="<%= currentPath === '/admin/configuracoes/atividades' ? 'is-active' : '' %>" href="/admin/configuracoes/atividades">Atividades</a>
+        <a class="<%= currentPath === '/admin/configuracoes/safras' ? 'is-active' : '' %>" href="/admin/configuracoes/safras">Safras e períodos</a>
+        <a class="<%= currentPath === '/admin/configuracoes/produtos' ? 'is-active' : '' %>" href="/admin/configuracoes/produtos">Produtos</a>
+        <a class="<%= currentPath === '/admin/configuracoes/manejos' ? 'is-active' : '' %>" href="/admin/configuracoes/manejos">Manejos</a>
+        <a class="<%= currentPath === '/admin/configuracoes/compradores' ? 'is-active' : '' %>" href="/admin/configuracoes/compradores">Compradores</a>
+        <a class="<%= currentPath === '/admin/configuracoes/manejo-produto' ? 'is-active' : '' %>" href="/admin/configuracoes/manejo-produto">Manejo por produto</a>
+        <a class="<%= currentPath === '/admin/configuracoes' ? 'is-active' : '' %>" href="/admin/configuracoes">Visão das configurações</a>
+      </nav>
+    </details>
+  <% } %>
+  <% if (user.Perfil === 'Administrador') { %>
+    <details open>
+      <summary>Pecuária de leite</summary>
+      <nav>
+        <a class="<%= currentPath === '/admin/parametros-pecuarios/categorias' ? 'is-active' : '' %>" href="/admin/parametros-pecuarios/categorias">Categorias</a>
+        <a class="<%= currentPath === '/admin/parametros-pecuarios/motivos-saida' ? 'is-active' : '' %>" href="/admin/parametros-pecuarios/motivos-saida">Motivos de Saída</a>
+        <a class="<%= currentPath === '/admin/parametros-pecuarios/tipos-prenhez' ? 'is-active' : '' %>" href="/admin/parametros-pecuarios/tipos-prenhez">Tipos de Prenhez</a>
+        <a class="<%= currentPath === '/admin/parametros-pecuarios/tipos-parto' ? 'is-active' : '' %>" href="/admin/parametros-pecuarios/tipos-parto">Tipos de Parto</a>
+      </nav>
+    </details>
+  <% } %>
+</aside>

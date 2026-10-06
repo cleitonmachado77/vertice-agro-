@@ -1,0 +1,10 @@
+<aside class="admin-sidebar agriculture-sidebar" aria-label="Navegação de Atividades Agrícolas">
+  <a class="admin-nav-home" href="/modulos">&larr; Módulos</a>
+  <p class="admin-nav-title">ATIVIDADES AGRÍCOLAS</p>
+  <nav>
+    <a class="<%= currentPath === '/modulos/agricultura' ? 'is-active' : '' %>" href="/modulos/agricultura">Painel agrícola</a>
+    <a class="<%= currentPath.startsWith('/agricultura/propriedades') ? 'is-active' : '' %>" href="/agricultura/propriedades">Propriedades</a>
+    <a class="<%= currentPath.startsWith('/agricultura/producoes') && !currentPath.startsWith('/agricultura/producoes/nova') ? 'is-active' : '' %>" href="/agricultura/producoes">Produções</a>
+    <a class="<%= currentPath.startsWith('/agricultura/entregas') || currentPath.endsWith('/entregas') ? 'is-active' : '' %>" href="/agricultura/entregas">Entregas</a>
+  </nav>
+</aside>

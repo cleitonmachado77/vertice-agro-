@@ -1,0 +1,10 @@
+    <% if (user && currentPath.startsWith('/admin')) { %>
+        </section>
+      </div>
+    <% } else if (user && (currentPath.startsWith('/agricultura') || currentPath === '/modulos/agricultura')) { %>
+        </section>
+      </div>
+    <% } %>
+  </main>
+</body>
+</html>

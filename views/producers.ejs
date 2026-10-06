@@ -1,0 +1,78 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="/modulos/admin">&larr; Administrador</a>
+    <p class="eyebrow">GESTÃO DE PRODUTORES</p>
+    <h1>Produtores</h1>
+  </div>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<section class="user-create-section">
+  <h2>Novo Produtor</h2>
+  <form method="post" action="/admin/produtores" class="user-create-form producer-create-form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Nome completo<input name="name" required minlength="2" maxlength="120"></label>
+    <label>Usuário de acesso<input name="login" required minlength="3" maxlength="50" autocomplete="off"></label>
+    <label>Associação
+      <select name="associationId" required>
+        <option value="">Selecione</option>
+        <% associations.forEach((association) => { %>
+          <option value="<%= association.idCooperativaAssociacao %>" <%= association.Ativo ? '' : 'disabled' %>><%= association.Nome %><%= association.Ativo ? '' : ' (Inativa)' %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Telefone<input name="phone" type="tel" maxlength="40"></label>
+    <label>E-mail<input name="email" type="email" maxlength="150"></label>
+    <label>Senha inicial<input name="password" type="password" required minlength="12" autocomplete="new-password"></label>
+    <button class="primary-button" type="submit">Criar Produtor</button>
+  </form>
+</section>
+<section class="user-list-section">
+  <h2>Produtores cadastrados</h2>
+  <% if (producers.length) { %>
+    <div class="table-scroll">
+      <table class="users-table producers-table">
+        <thead><tr><th>Nome</th><th>Usuário</th><th>Associação</th><th>Telefone</th><th>E-mail</th><th>Situação</th><th>Nova senha</th><th>Ações</th></tr></thead>
+        <tbody>
+          <% producers.forEach((producer) => { %>
+            <tr data-editable-row>
+              <td><input form="update-producer-<%= producer.idProdutor %>" name="name" value="<%= producer.Nome %>" required maxlength="120" aria-label="Nome do Produtor"></td>
+              <td><input form="update-producer-<%= producer.idProdutor %>" name="login" value="<%= producer.Login %>" required minlength="3" maxlength="50" aria-label="Usuário do Produtor"></td>
+              <td>
+                <select form="update-producer-<%= producer.idProdutor %>" name="associationId" aria-label="Associação do Produtor">
+                  <% associations.forEach((association) => { %>
+                    <option value="<%= association.idCooperativaAssociacao %>" <%= producer.CooperativaAssociacao_idCooperativaAssociacao === association.idCooperativaAssociacao ? 'selected' : '' %> <%= !association.Ativo && producer.CooperativaAssociacao_idCooperativaAssociacao !== association.idCooperativaAssociacao ? 'disabled' : '' %>><%= association.Nome %><%= association.Ativo ? '' : ' (Inativa)' %></option>
+                  <% }) %>
+                </select>
+              </td>
+              <td><input form="update-producer-<%= producer.idProdutor %>" name="phone" value="<%= producer.Fone || '' %>" type="tel" maxlength="40" aria-label="Telefone do Produtor"></td>
+              <td><input form="update-producer-<%= producer.idProdutor %>" name="email" value="<%= producer.Email || '' %>" type="email" maxlength="150" aria-label="E-mail do Produtor"></td>
+              <td>
+                <select form="update-producer-<%= producer.idProdutor %>" name="active" aria-label="Situação do Produtor">
+                  <option value="1" <%= producer.Ativo ? 'selected' : '' %>>Ativo</option>
+                  <option value="0" <%= producer.Ativo ? '' : 'selected' %>>Inativo</option>
+                </select>
+              </td>
+              <td><input form="update-producer-<%= producer.idProdutor %>" name="password" type="password" minlength="12" autocomplete="new-password" aria-label="Nova senha do Produtor"></td>
+              <td class="user-actions">
+                <form id="update-producer-<%= producer.idProdutor %>" data-row-update method="post" action="/admin/produtores/<%= producer.idProdutor %>/atualizar">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                </form>
+                <button class="small-button" type="button" data-edit-start>Editar</button>
+                <button class="small-button" form="update-producer-<%= producer.idProdutor %>" type="submit" data-edit-save hidden>Salvar</button>
+                <button class="small-button" type="button" data-edit-cancel hidden>Cancelar</button>
+                <form method="post" action="/admin/produtores/<%= producer.idProdutor %>/excluir" data-confirm="Excluir este Produtor e sua conta de acesso?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="small-button danger-button" type="submit">Excluir</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <p class="empty-state"><%= associations.length ? 'Nenhum Produtor cadastrado para as associações disponíveis.' : 'Nenhuma associação ativa está disponível.' %></p>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

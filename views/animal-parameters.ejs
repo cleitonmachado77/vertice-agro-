@@ -1,0 +1,82 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="/modulos/admin">&larr; Administrador</a>
+    <p class="eyebrow">CADASTRO ADMINISTRATIVO</p>
+    <h1><%= catalogs[0].title %></h1>
+  </div>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<% if (pendingCategories) { %><p class="form-error" role="status"><%= pendingCategories %> categoria(s) precisam de Nome e Sexo. Defina Macho ou Fêmea antes de usá-las.</p><% } %>
+<% catalogs.forEach((catalog) => { %>
+  <section class="user-create-section">
+    <h2><%= catalog.title %></h2>
+    <form method="post" action="/admin/parametros-pecuarios/<%= catalog.slug %>" class="user-create-form parameter-create-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <% catalog.fields.forEach((field) => { %>
+        <% if (field.type === 'select') { %>
+          <label><%= field.label %>
+            <select name="<%= field.name %>" required>
+              <option value="">Selecione</option>
+              <% field.options.forEach((option) => { %><option value="<%= option.value %>"><%= option.label %></option><% }) %>
+            </select>
+          </label>
+        <% } else { %>
+          <label><%= field.label %><input name="<%= field.name %>" type="<%= field.type %>" <%= field.min !== undefined ? `min="${field.min}"` : '' %> <%= field.max !== undefined ? `max="${field.max}"` : '' %> <%= field.step ? `step="${field.step}"` : '' %> <%= field.maxLength ? `maxlength="${field.maxLength}"` : '' %> required></label>
+        <% } %>
+      <% }) %>
+      <button class="primary-button" type="submit">Criar</button>
+    </form>
+    <% if (catalog.records.length) { %>
+      <div class="table-scroll unit-table-wrap">
+        <table class="users-table parameter-table">
+          <thead>
+            <tr>
+              <% catalog.fields.forEach((field) => { %><th><%= field.label %></th><% }) %>
+              <th>Situação</th><th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% catalog.records.forEach((record) => { %>
+              <tr data-editable-row>
+                <% catalog.fields.forEach((field) => { %>
+                  <% if (field.type === 'select') { %>
+                    <td>
+                      <select form="update-<%= catalog.slug %>-<%= record.id %>" name="<%= field.name %>" required aria-label="<%= field.label %>">
+                        <option value="">Selecione</option>
+                        <% field.options.forEach((option) => { %><option value="<%= option.value %>" <%= record[field.column] === option.value ? 'selected' : '' %>><%= option.label %></option><% }) %>
+                      </select>
+                    </td>
+                  <% } else { %>
+                    <td><input form="update-<%= catalog.slug %>-<%= record.id %>" name="<%= field.name %>" type="<%= field.type %>" value="<%= record[field.column] ?? '' %>" <%= field.min !== undefined ? `min="${field.min}"` : '' %> <%= field.max !== undefined ? `max="${field.max}"` : '' %> <%= field.step ? `step="${field.step}"` : '' %> <%= field.maxLength ? `maxlength="${field.maxLength}"` : '' %> required aria-label="<%= field.label %>"></td>
+                  <% } %>
+                <% }) %>
+                <td>
+                  <select form="update-<%= catalog.slug %>-<%= record.id %>" name="active" aria-label="Situação de <%= catalog.title %>">
+                    <option value="1" <%= record.Ativo ? 'selected' : '' %>>Ativo</option>
+                    <option value="0" <%= record.Ativo ? '' : 'selected' %>>Inativo</option>
+                  </select>
+                </td>
+                <td class="user-actions">
+                  <form id="update-<%= catalog.slug %>-<%= record.id %>" data-row-update method="post" action="/admin/parametros-pecuarios/<%= catalog.slug %>/<%= record.id %>/atualizar">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  </form>
+                  <button class="small-button" type="button" data-edit-start>Editar</button>
+                  <button class="small-button" form="update-<%= catalog.slug %>-<%= record.id %>" type="submit" data-edit-save hidden>Salvar</button>
+                  <button class="small-button" type="button" data-edit-cancel hidden>Cancelar</button>
+                  <form method="post" action="/admin/parametros-pecuarios/<%= catalog.slug %>/<%= record.id %>/excluir" data-confirm="Excluir este parâmetro?">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button class="small-button danger-button" type="submit">Excluir</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <p class="empty-state">Nenhum registro cadastrado.</p>
+    <% } %>
+  </section>
+<% }) %>
+<%- include('partials/footer') %>

@@ -1,0 +1,98 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="/modulos/admin">&larr; Administrador</a>
+    <p class="eyebrow">CADASTRO ADMINISTRATIVO</p>
+    <h1>Unidades</h1>
+  </div>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<section class="user-create-section">
+  <h2>Unidades de produção</h2>
+  <form method="post" action="/admin/unidades/producao" class="user-create-form locality-create-form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Nome<input name="name" required maxlength="100"></label>
+    <label>Sigla<input name="sigla" required maxlength="12"></label>
+    <button class="primary-button" type="submit">Criar unidade</button>
+  </form>
+  <% if (productionUnits.length) { %>
+    <div class="table-scroll unit-table-wrap">
+      <table class="users-table units-table">
+        <thead><tr><th>Nome</th><th>Sigla</th><th>Situação</th><th>Ações</th></tr></thead>
+        <tbody>
+          <% productionUnits.forEach((unit) => { %>
+            <tr data-editable-row>
+              <td><input form="update-production-<%= unit.idUnidade %>" name="name" value="<%= unit.Nome %>" required maxlength="100" aria-label="Nome da unidade"></td>
+              <td><input form="update-production-<%= unit.idUnidade %>" name="sigla" value="<%= unit.Sigla %>" required maxlength="12" aria-label="Sigla da unidade"></td>
+              <td>
+                <select form="update-production-<%= unit.idUnidade %>" name="active" aria-label="Situação da unidade">
+                  <option value="1" <%= unit.Ativo ? 'selected' : '' %>>Ativa</option>
+                  <option value="0" <%= unit.Ativo ? '' : 'selected' %>>Inativa</option>
+                </select>
+              </td>
+              <td class="user-actions">
+                <form id="update-production-<%= unit.idUnidade %>" data-row-update method="post" action="/admin/unidades/producao/<%= unit.idUnidade %>/atualizar">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                </form>
+                <button class="small-button" type="button" data-edit-start>Editar</button>
+                <button class="small-button" form="update-production-<%= unit.idUnidade %>" type="submit" data-edit-save hidden>Salvar</button>
+                <button class="small-button" type="button" data-edit-cancel hidden>Cancelar</button>
+                <form method="post" action="/admin/unidades/producao/<%= unit.idUnidade %>/excluir" data-confirm="Excluir esta unidade?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="small-button danger-button" type="submit">Excluir</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <p class="empty-state">Nenhuma unidade de produção cadastrada.</p>
+  <% } %>
+</section>
+<section class="user-create-section">
+  <h2>Unidades de área</h2>
+  <form method="post" action="/admin/unidades/area" class="user-create-form locality-create-form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Nome<input name="name" required maxlength="100"></label>
+    <label>Sigla<input name="sigla" required maxlength="12"></label>
+    <button class="primary-button" type="submit">Criar unidade</button>
+  </form>
+  <% if (areaUnits.length) { %>
+    <div class="table-scroll unit-table-wrap">
+      <table class="users-table units-table">
+        <thead><tr><th>Nome</th><th>Sigla</th><th>Situação</th><th>Ações</th></tr></thead>
+        <tbody>
+          <% areaUnits.forEach((unit) => { %>
+            <tr data-editable-row>
+              <td><input form="update-area-<%= unit.idUnidadeArea %>" name="name" value="<%= unit.Nome %>" required maxlength="100" aria-label="Nome da unidade de área"></td>
+              <td><input form="update-area-<%= unit.idUnidadeArea %>" name="sigla" value="<%= unit.Sigla %>" required maxlength="12" aria-label="Sigla da unidade de área"></td>
+              <td>
+                <select form="update-area-<%= unit.idUnidadeArea %>" name="active" aria-label="Situação da unidade de área">
+                  <option value="1" <%= unit.Ativo ? 'selected' : '' %>>Ativa</option>
+                  <option value="0" <%= unit.Ativo ? '' : 'selected' %>>Inativa</option>
+                </select>
+              </td>
+              <td class="user-actions">
+                <form id="update-area-<%= unit.idUnidadeArea %>" data-row-update method="post" action="/admin/unidades/area/<%= unit.idUnidadeArea %>/atualizar">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                </form>
+                <button class="small-button" type="button" data-edit-start>Editar</button>
+                <button class="small-button" form="update-area-<%= unit.idUnidadeArea %>" type="submit" data-edit-save hidden>Salvar</button>
+                <button class="small-button" type="button" data-edit-cancel hidden>Cancelar</button>
+                <form method="post" action="/admin/unidades/area/<%= unit.idUnidadeArea %>/excluir" data-confirm="Excluir esta unidade de área?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="small-button danger-button" type="submit">Excluir</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <p class="empty-state">Nenhuma unidade de área cadastrada.</p>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

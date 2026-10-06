@@ -1,0 +1,67 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="<%= mode === 'new' ? '/pecuaria/animais' : '/pecuaria/prenhezes/registro' %>">&larr; <%= mode === 'new' ? 'Animais' : 'Confirmação e Parto' %></a>
+    <p class="eyebrow">REPRODUÇÃO · <%= mode === 'new' ? 'REGISTRO' : mode === 'birth' ? 'PARTO' : mode === 'confirm' ? 'CONFIRMAÇÃO' : 'PREVISÃO' %></p>
+    <h1><%= pageTitle %></h1>
+    <% if (mode !== 'new') { %><p class="muted">Mãe <%= pregnancy.MotherTag %> · <%= pregnancy.PropriedadeNome %></p><% } else { %><p class="muted">Mãe <%= animal.Brinco %> · <%= animal.PropriedadeNome %></p><% } %>
+  </div>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+
+<% if (mode === 'new') { %>
+  <form class="property-form livestock-form" method="post" action="/pecuaria/prenhezes">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <input type="hidden" name="animalId" value="<%= animal.idAnimal %>">
+    <label>Pai (opcional)
+      <select name="fatherId"><option value="">Não informado</option><% sires.forEach((sire) => { %><option value="<%= sire.idAnimal %>" <%= Number(formValues.fatherId) === sire.idAnimal ? 'selected' : '' %>><%= sire.Brinco %></option><% }) %></select>
+    </label>
+    <label>Tipo de prenhez
+      <select name="pregnancyTypeId" required><option value="">Selecione</option><% methods.forEach((method) => { %><option value="<%= method.idTipoPrenhez %>" <%= Number(formValues.pregnancyTypeId) === method.idTipoPrenhez ? 'selected' : '' %>><%= method.Nome %></option><% }) %></select>
+    </label>
+    <label>Data da prenhez<input type="date" name="pregnancyDate" required value="<%= formValues.pregnancyDate || '' %>"></label>
+    <div class="property-form-actions livestock-form-actions">
+      <button class="primary-button" type="submit">Registrar prenhez</button>
+      <a class="secondary-button" href="/pecuaria/prenhezes">Cancelar</a>
+    </div>
+  </form>
+<% } else if (mode === 'confirm' || mode === 'forecast') { %>
+  <form class="property-form livestock-form" data-pregnancy-confirm-form data-gestation-days="<%= pregnancy.DiasGestacao %>" data-pregnancy-date="<%= pregnancy.DataPrenhez || '' %>" method="post" action="/pecuaria/prenhezes/<%= pregnancy.idPrenhez %>/<%= mode === 'forecast' ? 'previsao' : 'confirmar' %>">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <p class="empty-state">Gestação configurada para <strong><%= pregnancy.DiasGestacao %> dias</strong> nesta propriedade.</p>
+    <label>Data da prenhez<input type="date" name="pregnancyDate" required value="<%= formValues.pregnancyDate %>" data-pregnancy-date></label>
+    <label>Data da confirmação ou avaliação<input type="date" name="confirmationDate" required value="<%= formValues.confirmationDate %>"></label>
+    <label>Dias de prenhez<input type="number" name="daysPregnant" min="0" max="<%= pregnancy.DiasGestacao %>" step="1" value="<%= formValues.daysPregnant ?? '' %>" data-days-pregnant></label>
+    <label>Previsão do parto<input type="date" name="expectedCalvingDate" required value="<%= formValues.expectedCalvingDate %>" data-expected-calving-date readonly></label>
+    <div class="property-form-actions livestock-form-actions">
+      <button class="primary-button" type="submit"><%= pregnancy.Status === 'Prenhez Confirmada' ? 'Salvar previsão' : 'Confirmar prenhez e previsão' %></button>
+      <a class="secondary-button" href="/pecuaria/prenhezes/registro">Cancelar</a>
+    </div>
+  </form>
+<% } else { %>
+  <% const selectedSexes = Array.isArray(formValues.offspringSexes) ? formValues.offspringSexes : formValues.offspringSexes ? [formValues.offspringSexes] : []; %>
+  <% const selectedTags = Array.isArray(formValues.offspringTags) ? formValues.offspringTags : formValues.offspringTags ? [formValues.offspringTags] : []; %>
+  <form class="property-form livestock-form" data-calving-form data-offspring-count="<%= offspringCount %>" method="post" action="/pecuaria/prenhezes/<%= pregnancy.idPrenhez %>/parto">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Data do parto<input type="date" name="birthDate" required value="<%= formValues.birthDate %>"></label>
+    <label>Tipo de parto
+      <select name="birthTypeId" required data-birth-type><% birthTypes.forEach((birthType) => { %><option value="<%= birthType.idTipoParto %>" data-quantity="<%= birthType.Quantidade %>" <%= Number(formValues.birthTypeId) === birthType.idTipoParto ? 'selected' : '' %>><%= birthType.Nome %> · <%= birthType.Quantidade %> animal(is)</option><% }) %></select>
+    </label>
+    <label class="animal-herd-toggle"><input type="checkbox" name="enterLactation" value="1" <%= formValues.enterLactation === '0' ? '' : 'checked' %>> Iniciar lactação da mãe</label>
+    <fieldset class="offspring-fields" data-offspring-container>
+      <legend>Animais nascidos</legend>
+      <% for (let index = 0; index < 20; index += 1) { %>
+        <div class="offspring-row" data-offspring-row <%= index >= offspringCount ? 'hidden' : '' %>>
+          <strong>Nascido <%= index + 1 %></strong>
+          <label>Sexo<select name="offspringSexes" required <%= index >= offspringCount ? 'disabled' : '' %>><option value="">Selecione</option><option value="F" <%= selectedSexes[index] === 'F' ? 'selected' : '' %>>Fêmea</option><option value="M" <%= selectedSexes[index] === 'M' ? 'selected' : '' %>>Macho</option></select></label>
+          <label>Brinco (opcional)<input name="offspringTags" maxlength="80" value="<%= selectedTags[index] || '' %>" <%= index >= offspringCount ? 'disabled' : '' %>></label>
+        </div>
+      <% } %>
+    </fieldset>
+    <div class="property-form-actions livestock-form-actions">
+      <button class="primary-button" type="submit">Confirmar parto</button>
+      <a class="secondary-button" href="/pecuaria/prenhezes/registro">Cancelar</a>
+    </div>
+  </form>
+<% } %>
+<%- include('partials/footer') %>

@@ -1,0 +1,59 @@
+<%- include('partials/header') %>
+<% const propertyBasePath = livestockOnly ? '/pecuaria/propriedades' : '/agricultura/propriedades'; %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="<%= livestockOnly ? '/modulos/pecuaria' : '/modulos/agricultura' %>">&larr; <%= livestockOnly ? 'Pecuária de Leite' : 'Atividades Agrícolas' %></a>
+    <p class="eyebrow"><%= livestockOnly ? 'REBANHO · PROPRIEDADES' : 'CONFIGURAÇÃO DA PRODUÇÃO' %></p>
+    <h1>Propriedades</h1>
+  </div>
+  <% if (producerOptions.length) { %>
+    <a class="primary-button" href="<%= propertyBasePath %>/nova">Nova propriedade <span aria-hidden="true">+</span></a>
+  <% } %>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<% if (user.Perfil !== 'Produtor') { %>
+  <form method="get" action="<%= livestockOnly ? '/pecuaria/propriedades' : '/agricultura/propriedades' %>" class="property-filter">
+    <label>Cooperativa ou associação
+      <select name="associacao">
+        <option value="">Todas as associações disponíveis</option>
+        <% associations.forEach((association) => { %>
+          <option value="<%= association.idCooperativaAssociacao %>" <%= selectedAssociationId === association.idCooperativaAssociacao ? 'selected' : '' %>><%= association.Nome %></option>
+        <% }) %>
+      </select>
+    </label>
+    <button class="secondary-button" type="submit">Filtrar</button>
+  </form>
+<% } %>
+<section class="user-list-section property-list-section">
+  <h2>Propriedades cadastradas</h2>
+  <% if (properties.length) { %>
+    <div class="table-scroll">
+      <table class="users-table properties-table">
+        <thead><tr><th>Propriedade</th><th>Produtor</th><th>Associação</th><th>Município</th><th>Área</th><th>Situação</th><th>Ações</th></tr></thead>
+        <tbody>
+          <% properties.forEach((property) => { %>
+            <tr>
+              <td><strong><%= property.Nome %></strong></td>
+              <td><%= property.ProdutorNome %></td>
+              <td><%= property.AssociacaoNome %></td>
+              <td><%= property.MunicipioNome %> / <%= property.EstadoSigla %></td>
+              <td><%= property.AreaTotal === null ? '—' : Number(property.AreaTotal).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) %></td>
+              <td><span class="status-chip <%= property.Ativo ? 'status-active' : 'status-inactive' %>"><%= property.Ativo ? 'Ativa' : 'Inativa' %></span></td>
+              <td class="user-actions">
+                <a class="small-button" href="<%= propertyBasePath %>/<%= property.idPropriedade %>?aba=dados">Editar</a>
+                <form method="post" action="<%= propertyBasePath %>/<%= property.idPropriedade %>/excluir" data-confirm="Excluir esta propriedade e os dados vinculados?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="moduleOrigin" value="<%= livestockOnly ? 'pecuaria' : 'agricultura' %>">
+                  <button class="small-button danger-button" type="submit">Excluir</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <p class="empty-state"><%= producerOptions.length ? 'Nenhuma propriedade encontrada para este filtro.' : 'Nenhum Produtor ativo está disponível para cadastrar propriedades.' %></p>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

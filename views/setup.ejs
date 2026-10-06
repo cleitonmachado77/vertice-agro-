@@ -1,0 +1,24 @@
+<%- include('partials/header') %>
+<section class="auth-layout">
+  <div class="auth-aside">
+    <p class="eyebrow">CONFIGURAÇÃO INICIAL</p>
+    <h1>Um ponto de partida para a gestão rural.</h1>
+    <p class="aside-copy">Vértice Agro organiza produtores, propriedades e produção em um só lugar.</p>
+    <div class="aside-rule"><span></span><span></span><span></span></div>
+  </div>
+  <div class="auth-panel">
+    <p class="eyebrow">PRIMEIRO ACESSO</p>
+    <h2>Criar administrador</h2>
+    <p class="muted">Defina a conta que administrará o sistema.</p>
+    <% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+    <form method="post" action="/setup" class="form-stack">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>Nome completo<input name="name" autocomplete="name" required maxlength="120"></label>
+      <label>Usuário<input name="login" autocomplete="username" required minlength="3" maxlength="50"></label>
+      <label>Senha<input type="password" name="password" autocomplete="new-password" required minlength="12"></label>
+      <label>Confirme a senha<input type="password" name="confirmation" autocomplete="new-password" required minlength="12"></label>
+      <button class="primary-button" type="submit">Criar conta</button>
+    </form>
+  </div>
+</section>
+<%- include('partials/footer') %>

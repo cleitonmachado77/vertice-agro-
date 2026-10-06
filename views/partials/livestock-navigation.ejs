@@ -1,0 +1,15 @@
+<aside class="admin-sidebar agriculture-sidebar" aria-label="Navegação de Pecuária de Leite">
+  <a class="admin-nav-home" href="/modulos">&larr; Módulos</a>
+  <p class="admin-nav-title">PECUÁRIA DE LEITE</p>
+  <nav>
+    <a class="<%= currentPath === '/modulos/pecuaria' ? 'is-active' : '' %>" href="/modulos/pecuaria">Painel pecuário</a>
+    <a class="<%= currentPath.startsWith('/pecuaria/propriedades') ? 'is-active' : '' %>" href="/pecuaria/propriedades">Propriedades</a>
+    <a class="<%= currentPath.startsWith('/pecuaria/animais') ? 'is-active' : '' %>" href="/pecuaria/animais">Animais</a>
+    <a class="<%= currentPath === '/pecuaria/prenhezes' ? 'is-active' : '' %>" href="/pecuaria/prenhezes">Prenhezes (Fêmeas Vazias)</a>
+    <a class="<%= currentPath.startsWith('/pecuaria/prenhezes/registro') || /^\/pecuaria\/prenhezes\/\d/.test(currentPath) ? 'is-active' : '' %>" href="/pecuaria/prenhezes/registro">Confirmação e Parto</a>
+    <a class="<%= currentPath.startsWith('/pecuaria/lactacoes') ? 'is-active' : '' %>" href="/pecuaria/lactacoes">Registro de Lactações</a>
+    <a class="<%= currentPath.startsWith('/pecuaria/producao-diaria') ? 'is-active' : '' %>" href="/pecuaria/producao-diaria">Produção Diária</a>
+    <a class="<%= currentPath.startsWith('/pecuaria/producoes') ? 'is-active' : '' %>" href="/pecuaria/producoes">Produções</a>
+    <a class="<%= currentPath === '/pecuaria/entregas' || currentPath.endsWith('/entregas') ? 'is-active' : '' %>" href="/pecuaria/entregas">Entregas</a>
+  </nav>
+</aside>

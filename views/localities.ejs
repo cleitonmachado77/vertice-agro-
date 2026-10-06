@@ -1,0 +1,118 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="/modulos/admin">&larr; Administrador</a>
+    <p class="eyebrow">CADASTRO ADMINISTRATIVO</p>
+    <h1>Estados e Municípios</h1>
+  </div>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<section class="user-create-section">
+  <h2>Novo Estado</h2>
+  <form method="post" action="/admin/estados" class="user-create-form locality-create-form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Sigla<input name="sigla" required minlength="2" maxlength="5" autocapitalize="characters"></label>
+    <label>Nome<input name="name" required minlength="2" maxlength="100"></label>
+    <button class="primary-button" type="submit">Criar Estado</button>
+  </form>
+</section>
+<section class="user-list-section">
+  <h2>Estados cadastrados</h2>
+  <% if (states.length) { %>
+    <div class="table-scroll">
+      <table class="users-table states-table">
+        <thead><tr><th>Sigla</th><th>Estado</th><th>Municípios</th><th>Situação</th><th>Ações</th></tr></thead>
+        <tbody>
+          <% states.forEach((state) => { %>
+            <tr data-editable-row>
+              <td><input form="update-state-<%= state.idEstado %>" name="sigla" value="<%= state.Sigla %>" required maxlength="5" aria-label="Sigla de <%= state.Nome %>"></td>
+              <td><input form="update-state-<%= state.idEstado %>" name="name" value="<%= state.Nome %>" required maxlength="100" aria-label="Nome do Estado"></td>
+              <td class="association-count"><%= state.TotalMunicipios %></td>
+              <td>
+                <select form="update-state-<%= state.idEstado %>" name="active" aria-label="Situação do Estado">
+                  <option value="1" <%= state.Ativo ? 'selected' : '' %>>Ativo</option>
+                  <option value="0" <%= state.Ativo ? '' : 'selected' %>>Inativo</option>
+                </select>
+              </td>
+              <td class="user-actions">
+                <form id="update-state-<%= state.idEstado %>" data-row-update method="post" action="/admin/estados/<%= state.idEstado %>/atualizar">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                </form>
+                <button class="small-button" type="button" data-edit-start>Editar</button>
+                <button class="small-button" form="update-state-<%= state.idEstado %>" type="submit" data-edit-save hidden>Salvar</button>
+                <button class="small-button" type="button" data-edit-cancel hidden>Cancelar</button>
+                <form method="post" action="/admin/estados/<%= state.idEstado %>/excluir" data-confirm="Excluir este Estado?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="small-button danger-button" type="submit">Excluir</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <p class="empty-state">Nenhum Estado cadastrado.</p>
+  <% } %>
+</section>
+<section class="user-create-section">
+  <h2>Novo Município</h2>
+  <form method="post" action="/admin/municipios" class="user-create-form locality-create-form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Estado
+      <select name="stateId" required>
+        <option value="">Selecione</option>
+        <% states.forEach((state) => { %>
+          <option value="<%= state.idEstado %>" <%= state.Ativo ? '' : 'disabled' %>><%= state.Nome %> (<%= state.Sigla %>)<%= state.Ativo ? '' : ' (Inativo)' %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Município<input name="name" required minlength="2" maxlength="120"></label>
+    <button class="primary-button" type="submit">Criar Município</button>
+  </form>
+</section>
+<section class="user-list-section">
+  <h2>Municípios cadastrados</h2>
+  <% if (municipalities.length) { %>
+    <div class="table-scroll">
+      <table class="users-table municipalities-table">
+        <thead><tr><th>Município</th><th>Estado</th><th>Situação</th><th>Ações</th></tr></thead>
+        <tbody>
+          <% municipalities.forEach((municipality) => { %>
+            <tr data-editable-row>
+              <td><input form="update-municipality-<%= municipality.idMunicipio %>" name="name" value="<%= municipality.Nome %>" required maxlength="120" aria-label="Nome do Município"></td>
+              <td>
+                <select form="update-municipality-<%= municipality.idMunicipio %>" name="stateId" aria-label="Estado do Município">
+                  <% states.forEach((state) => { %>
+                    <option value="<%= state.idEstado %>" <%= municipality.Estado_idEstado === state.idEstado ? 'selected' : '' %> <%= !state.Ativo && municipality.Estado_idEstado !== state.idEstado ? 'disabled' : '' %>><%= state.Nome %> (<%= state.Sigla %>)<%= state.Ativo ? '' : ' (Inativo)' %></option>
+                  <% }) %>
+                </select>
+              </td>
+              <td>
+                <select form="update-municipality-<%= municipality.idMunicipio %>" name="active" aria-label="Situação do Município">
+                  <option value="1" <%= municipality.Ativo ? 'selected' : '' %>>Ativo</option>
+                  <option value="0" <%= municipality.Ativo ? '' : 'selected' %>>Inativo</option>
+                </select>
+              </td>
+              <td class="user-actions">
+                <form id="update-municipality-<%= municipality.idMunicipio %>" data-row-update method="post" action="/admin/municipios/<%= municipality.idMunicipio %>/atualizar">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                </form>
+                <button class="small-button" type="button" data-edit-start>Editar</button>
+                <button class="small-button" form="update-municipality-<%= municipality.idMunicipio %>" type="submit" data-edit-save hidden>Salvar</button>
+                <button class="small-button" type="button" data-edit-cancel hidden>Cancelar</button>
+                <form method="post" action="/admin/municipios/<%= municipality.idMunicipio %>/excluir" data-confirm="Excluir este Município?">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="small-button danger-button" type="submit">Excluir</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <p class="empty-state">Nenhum Município cadastrado.</p>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

@@ -1,0 +1,105 @@
+<%- include('partials/header') %>
+<% const formId = 'production-editor'; %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="<%= moduleBasePath %>">&larr; Produções</a>
+    <p class="eyebrow">ATIVIDADES <%= activityLabel.toUpperCase() %></p>
+    <h1><%= existing ? 'Editar produção' : 'Nova produção' %></h1>
+  </div>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<section class="user-create-section">
+  <h2><%= existing ? `Produção #${production.IdProducao}` : 'Dados da produção' %></h2>
+  <% if (!properties.length) { %>
+    <p class="empty-state">Cadastre uma propriedade ativa, uma atividade <%= activityLabel %> e vincule um produto antes de registrar a produção.</p>
+    <a class="secondary-button" href="/<%= moduleOrigin %>/propriedades">Abrir propriedades</a>
+  <% } else { %>
+    <form id="<%= formId %>" method="post" action="<%= existing ? `${moduleBasePath}/${production.IdProducao}/atualizar` : moduleBasePath %>" class="property-form production-form<%= existing ? ' production-edit-form' : '' %>" <%= existing ? 'data-editable-row' : '' %>>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <% if (existing) { %>
+        <label>IdProducao<input type="text" value="<%= production.IdProducao %>" readonly aria-label="Identificador da produção"></label>
+      <% } %>
+      <label>Propriedade
+        <select name="propertyId" required form="<%= formId %>">
+          <option value="">Selecione</option>
+          <% properties.forEach((property) => { %>
+            <option value="<%= property.idPropriedade %>" <%= existing && production.Propriedade_idPropriedade === property.idPropriedade ? 'selected' : '' %>><%= property.PropriedadeNome %> · <%= property.ProdutorNome %> · <%= property.AssociacaoNome %></option>
+          <% }) %>
+        </select>
+      </label>
+      <label>Atividade da propriedade
+        <select name="activityPropertyId" required form="<%= formId %>">
+          <option value="">Selecione</option>
+          <% activities.forEach((activity) => { %>
+            <option value="<%= activity.idAtividadePropriedade %>" data-property-id="<%= activity.Propriedade_idPropriedade %>" data-activity-id="<%= activity.Atividade_idAtividade %>" <%= existing && production.AtividadePropriedade_idAtividadePropriedade === activity.idAtividadePropriedade ? 'selected' : '' %>><%= activity.Descricao %></option>
+          <% }) %>
+        </select>
+      </label>
+      <% if (moduleOrigin === 'agricultura') { %><label>Talhão
+        <select name="talhaoId" required form="<%= formId %>">
+          <option value="">Selecione</option>
+          <% talhoes.forEach((talhao) => { %>
+            <option value="<%= talhao.idTalhaoArea %>" data-property-id="<%= talhao.Propriedade_idPropriedade %>" data-area="<%= talhao.Area %>" data-area-unit="<%= talhao.UnidadeSigla || '' %>" <%= existing && production.TalhaoArea_idTalhaoArea === talhao.idTalhaoArea ? 'selected' : '' %>><%= talhao.Descricao %> · <%= Number(talhao.Area).toLocaleString('pt-BR', { maximumFractionDigits: 3 }) %> <%= talhao.UnidadeSigla || '' %></option>
+          <% }) %>
+        </select>
+      </label>
+      <label class="production-area-field"><span class="production-field-heading">Área planejada <small data-talhao-area-help>Selecione um talhão</small></span>
+        <input name="areaPlanned" type="number" min="0.01" step="any" value="<%= existing ? production.AreaPlanejada : '' %>" required form="<%= formId %>">
+      </label><% } %>
+      <label>Produto
+        <select name="productId" required form="<%= formId %>">
+          <option value="">Selecione</option>
+          <% products.forEach((product) => { %>
+            <option value="<%= product.idProduto %>" data-activity-id="<%= product.Atividade_idAtividade %>" data-unit-id="<%= product.idUnidade %>" data-unit-name="<%= product.UnidadeNome %>" data-unit-sigla="<%= product.UnidadeSigla %>" <%= existing && production.Produto_idProduto === product.idProduto ? 'selected' : '' %>><%= product.ProdutoNome %> · <%= product.AtividadeNome %> · <%= product.UnidadeNome %> (<%= product.UnidadeSigla %>)</option>
+          <% }) %>
+        </select>
+      </label>
+      <label>Unidade_idUnidade (definida pelo Produto)
+        <input type="text" value="<%= existing ? `${production.UnidadeNome} (${production.UnidadeSigla})` : '' %>" readonly data-unit-display aria-label="Unidade do produto">
+      </label>
+      <label class="production-description-field">Descrição
+        <textarea name="description" maxlength="500" rows="2" form="<%= formId %>"><%= existing ? production.Descricao || '' : '' %></textarea>
+      </label>
+      <label>Situação
+        <select name="situation" required form="<%= formId %>">
+          <option value="Planejada" <%= !existing || production.Situacao === 'Planejada' ? 'selected' : '' %>>Planejada</option>
+          <option value="Realizada" <%= existing && production.Situacao === 'Realizada' ? 'selected' : '' %>>Realizada</option>
+        </select>
+      </label>
+      <label>Início da produção
+        <input name="startDate" type="date" value="<%= existing ? production.InicioProducao : '' %>" required form="<%= formId %>">
+      </label>
+      <div class="production-conditional-fields" data-planned-fields>
+        <label>Data de previsão
+          <input name="forecastDate" type="date" value="<%= existing && production.Situacao === 'Planejada' ? production.PrevisaoProducao || '' : '' %>" form="<%= formId %>">
+        </label>
+        <label>Previsão
+          <input name="forecast" type="number" min="0.01" step="any" value="<%= existing && production.Situacao === 'Planejada' ? production.Previsao ?? '' : '' %>" form="<%= formId %>">
+        </label>
+      </div>
+      <div class="production-conditional-fields" data-realized-field>
+        <label>Realizado
+          <input name="realized" type="number" min="0.01" step="any" value="<%= existing && production.Situacao === 'Realizada' ? production.Realizado ?? '' : '' %>" form="<%= formId %>">
+        </label>
+      </div>
+      <div class="property-form-actions production-form-actions">
+        <% if (existing) { %>
+          <button class="small-button" type="button" data-edit-start>Editar</button>
+          <button class="small-button" type="submit" data-edit-save hidden>Salvar alterações</button>
+          <button class="small-button" type="button" data-edit-cancel hidden>Cancelar</button>
+        <% } else { %>
+          <button class="primary-button" type="submit">Registrar produção</button>
+        <% } %>
+      </div>
+    </form>
+    <% if (existing) { %>
+      <div class="production-record-actions">
+        <form method="post" action="<%= moduleBasePath %>/<%= production.IdProducao %>/excluir" data-confirm="Excluir esta produção? As entregas vinculadas impedem a exclusão.">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button class="small-button danger-button" type="submit">Excluir produção</button>
+        </form>
+      </div>
+    <% } %>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

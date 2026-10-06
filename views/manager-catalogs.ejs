@@ -1,0 +1,19 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="/modulos/admin">&larr; Administrador</a>
+    <p class="eyebrow">GESTÃO DE PRODUÇÃO</p>
+    <h1>Configurações</h1>
+  </div>
+</section>
+<section class="module-grid catalog-grid" aria-label="Configurações disponíveis">
+  <% catalogs.forEach((catalog, index) => { %>
+    <a class="module-card module-tone-<%= index %>" href="/admin/configuracoes/<%= catalog.slug %>">
+      <span class="module-index"><%= Number(catalog.total).toLocaleString('pt-BR') %> registros</span>
+      <span class="module-card-title"><%= catalog.title %></span>
+      <span class="module-card-subtitle"><%= catalog.description %></span>
+      <span class="module-arrow" aria-hidden="true">&rarr;</span>
+    </a>
+  <% }) %>
+</section>
+<%- include('partials/footer') %>

@@ -1,0 +1,165 @@
+<%- include('partials/header') %>
+<section class="page-heading module-heading">
+  <div>
+    <a class="back-link" href="/modulos">&larr; Módulos</a>
+    <p class="eyebrow"><%= module.subtitle.toUpperCase() %></p>
+    <h1><%= module.title %></h1>
+  </div>
+  <span class="period-chip">Visão geral</span>
+</section>
+<section class="metric-grid" aria-label="Indicadores">
+  <% metrics.forEach((metric, index) => { %>
+    <article class="metric-item metric-accent-<%= index %>">
+      <span class="metric-label"><%= metric.label %></span>
+      <strong class="metric-value"><%= Number(metric.value).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) %></strong>
+    </article>
+  <% }) %>
+</section>
+<% if (module.title === 'Atividades Agrícolas' && forecastChart) { %>
+  <section class="forecast-panel" id="previsao-producao" aria-labelledby="forecast-title">
+    <div class="forecast-heading">
+      <div>
+        <p class="eyebrow">PRODUÇÃO PLANEJADA</p>
+        <h2 id="forecast-title">Previsão de produção</h2>
+      </div>
+      <% if (forecastChart.products.length) { %>
+        <form class="forecast-filter" method="get" action="/modulos/agricultura#previsao-producao">
+          <label for="forecast-product">Produto</label>
+          <select id="forecast-product" name="productId">
+            <option value="">Todos os produtos</option>
+            <% forecastChart.products.forEach((product) => { %>
+              <option value="<%= product.idProduto %>" <%= forecastChart.productId === product.idProduto ? 'selected' : '' %>><%= product.Nome %> (<%= product.UnidadeSigla %>)</option>
+            <% }) %>
+          </select>
+          <button class="secondary-button" type="submit">Aplicar</button>
+        </form>
+      <% } %>
+    </div>
+    <% if (forecastChart.hasData) { %>
+      <% forecastChart.charts.forEach((chart, chartIndex) => { %>
+        <div class="forecast-chart-group">
+          <h3 class="forecast-unit-title">Quantidade em <%= chart.unit %></h3>
+          <div class="forecast-chart-wrap">
+            <svg class="forecast-chart" viewBox="0 0 <%= chart.width %> <%= chart.height %>" role="img" aria-labelledby="forecast-title forecast-description-<%= chartIndex %>">
+              <desc id="forecast-description-<%= chartIndex %>">Quantidades previstas ao longo das datas de previsão, em <%= chart.unit %>.</desc>
+              <% chart.yTicks.forEach((tick) => { %>
+                <line class="forecast-grid-line" x1="<%= chart.plot.left %>" y1="<%= tick.y %>" x2="<%= chart.plot.right %>" y2="<%= tick.y %>"></line>
+                <text class="forecast-axis-label" x="<%= chart.plot.left - 12 %>" y="<%= tick.y + 4 %>" text-anchor="end"><%= tick.label %></text>
+              <% }) %>
+              <% chart.xTicks.forEach((tick) => { %>
+                <line class="forecast-tick-line" x1="<%= tick.x %>" y1="<%= chart.plot.bottom %>" x2="<%= tick.x %>" y2="<%= chart.plot.bottom + 5 %>"></line>
+                <text class="forecast-axis-label" x="<%= tick.x %>" y="<%= chart.plot.bottom + 24 %>" text-anchor="middle"><%= tick.label %></text>
+              <% }) %>
+              <% chart.series.forEach((series) => { %>
+                <path class="forecast-series-line forecast-color-<%= series.colorIndex %>" d="<%= series.path %>"></path>
+                <% series.points.forEach((point) => { %>
+                  <circle class="forecast-series-point forecast-color-<%= series.colorIndex %>" cx="<%= point.x %>" cy="<%= point.y %>" r="4">
+                    <title><%= series.name %>: <%= point.label %> <%= series.unit %> em <%= point.date %></title>
+                  </circle>
+                <% }) %>
+              <% }) %>
+            </svg>
+          </div>
+          <ul class="forecast-legend" aria-label="Produtos em <%= chart.unit %>">
+            <% chart.series.forEach((series) => { %>
+              <li><span class="forecast-legend-marker forecast-color-<%= series.colorIndex %>" aria-hidden="true"></span><span><%= series.name %> <small>(<%= series.unit %>)</small></span></li>
+            <% }) %>
+          </ul>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p class="empty-state">Não há previsões planejadas para o produto selecionado.</p>
+    <% } %>
+  </section>
+<% } %>
+<% if (module.title === 'Pecuária de Leite' && milkChart) { %>
+  <section class="forecast-panel" id="producao-leite" aria-labelledby="milk-title">
+    <div class="forecast-heading">
+      <div>
+        <p class="eyebrow">LACTAÇÕES · LANÇAMENTOS</p>
+        <h2 id="milk-title">Curva média de lactação</h2>
+      </div>
+      <% if (milkChart.properties.length) { %>
+        <form class="forecast-filter" method="get" action="/modulos/pecuaria#producao-leite">
+          <div class="forecast-filter-fields">
+            <label for="milk-property">Propriedade</label>
+            <select id="milk-property" name="propertyId">
+              <option value="">Todas disponíveis</option>
+              <% milkChart.properties.forEach((property) => { %>
+                <option value="<%= property.idPropriedade %>" <%= milkChart.propertyId === property.idPropriedade ? 'selected' : '' %>><%= property.Nome %> · <%= property.ProdutorNome %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="forecast-filter-fields">
+            <label for="milk-animal">Animal</label>
+            <select id="milk-animal" name="animalId">
+              <option value="">Média da propriedade</option>
+              <% milkChart.animals.forEach((animal) => { %>
+                <option value="<%= animal.idAnimal %>" <%= milkChart.animalId === animal.idAnimal ? 'selected' : '' %>><%= animal.Brinco || `Animal ${animal.idAnimal}` %> · <%= animal.PropriedadeNome %></option>
+              <% }) %>
+            </select>
+          </div>
+          <button class="secondary-button" type="submit">Aplicar</button>
+        </form>
+      <% } %>
+    </div>
+    <% if (milkChart.hasData) { %>
+      <p class="muted">Eixo horizontal: data de cada pesagem. Eixo vertical: litros médios por animal no dia.</p>
+      <div class="forecast-chart-wrap">
+        <svg class="forecast-chart" viewBox="0 0 <%= milkChart.chart.width %> <%= milkChart.chart.height %>" role="img" aria-labelledby="milk-title milk-description">
+          <desc id="milk-description">Litros médios registrados em cada data de pesagem, para a propriedade selecionada ou o animal selecionado.</desc>
+          <% milkChart.chart.yTicks.forEach((tick) => { %>
+            <line class="forecast-grid-line" x1="<%= milkChart.chart.plot.left %>" y1="<%= tick.y %>" x2="<%= milkChart.chart.plot.right %>" y2="<%= tick.y %>"></line>
+            <text class="forecast-axis-label" x="<%= milkChart.chart.plot.left - 12 %>" y="<%= tick.y + 4 %>" text-anchor="end"><%= tick.label %></text>
+          <% }) %>
+          <% milkChart.chart.xTicks.forEach((tick) => { %>
+            <line class="forecast-tick-line" x1="<%= tick.x %>" y1="<%= milkChart.chart.plot.bottom %>" x2="<%= tick.x %>" y2="<%= milkChart.chart.plot.bottom + 5 %>"></line>
+            <text class="forecast-axis-label" x="<%= tick.x %>" y="<%= milkChart.chart.plot.bottom + 24 %>" text-anchor="middle"><%= tick.label %></text>
+          <% }) %>
+          <% milkChart.chart.series.forEach((series) => { %>
+            <path class="forecast-series-line forecast-color-<%= series.colorIndex %>" d="<%= series.path %>"></path>
+            <% series.points.forEach((point) => { %>
+              <circle class="forecast-series-point forecast-color-<%= series.colorIndex %>" cx="<%= point.x %>" cy="<%= point.y %>" r="4">
+                <title><%= series.name %>: <%= point.label %> litros em <%= point.date %> (<%= point.animals %> animal(is))</title>
+              </circle>
+            <% }) %>
+          <% }) %>
+        </svg>
+      </div>
+      <ul class="forecast-legend" aria-label="Séries no gráfico">
+        <% milkChart.chart.series.forEach((series) => { %>
+          <li><span class="forecast-legend-marker forecast-color-<%= series.colorIndex %>" aria-hidden="true"></span><span><%= series.name %></span></li>
+        <% }) %>
+      </ul>
+    <% } else { %>
+      <p class="empty-state">Ainda não há lançamentos de leite para o escopo selecionado.</p>
+    <% } %>
+  </section>
+<% } %>
+<section class="module-status">
+  <div class="status-marker" aria-hidden="true"></div>
+  <div>
+    <h2><%= module.title %></h2>
+    <p>Os indicadores mostram os registros disponíveis para seu perfil.</p>
+  </div>
+</section>
+<% if (module.title === 'Administrador') { %>
+  <section class="admin-shortcut">
+    <div>
+      <p class="eyebrow"><%= user.Perfil === 'Administrador' ? 'ACESSO E PERFIS' : 'CONFIGURAÇÕES COMPARTILHADAS' %></p>
+      <h2><%= user.Perfil === 'Administrador' ? 'Cadastros administrativos' : 'Configurações de produção' %></h2>
+    </div>
+    <div class="admin-shortcut-links">
+      <% if (user.Perfil === 'Administrador') { %>
+        <a class="secondary-button" href="/admin/usuarios">Usuários <span aria-hidden="true">&rarr;</span></a>
+        <a class="secondary-button" href="/admin/associacoes">Associações <span aria-hidden="true">&rarr;</span></a>
+        <a class="secondary-button" href="/admin/localidades">Estados e Municípios <span aria-hidden="true">&rarr;</span></a>
+        <a class="secondary-button" href="/admin/unidades">Unidades <span aria-hidden="true">&rarr;</span></a>
+        <a class="secondary-button" href="/admin/parametros-pecuarios/categorias">Categorias <span aria-hidden="true">&rarr;</span></a>
+      <% } %>
+      <a class="secondary-button" href="/admin/produtores">Produtores <span aria-hidden="true">&rarr;</span></a>
+      <a class="primary-button" href="/admin/configuracoes">Configurações <span aria-hidden="true">&rarr;</span></a>
+    </div>
+  </section>
+<% } %>
+<%- include('partials/footer') %>

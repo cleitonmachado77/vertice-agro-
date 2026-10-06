@@ -1,0 +1,23 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="/pecuaria/lactacoes?propertyId=<%= lactation.idPropriedade %>">&larr; Registro de Lactações</a>
+    <p class="eyebrow">REBANHO · PRODUÇÃO LEITEIRA</p>
+    <h1>Editar Lactação</h1>
+    <p class="muted">Brinco <strong><%= lactation.Brinco || lactation.idAnimal %></strong> · <%= lactation.PropriedadeNome %></p>
+  </div>
+</section>
+<% if (error) { %><p class="form-error" role="alert"><%= error %></p><% } %>
+<section class="user-create-section">
+  <h2>Período da lactação</h2>
+  <form class="property-form livestock-form" method="post" action="/pecuaria/lactacoes/<%= lactation.idLactacoes %>/atualizar">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Início<input type="date" name="startDate" required min="<%= lactation.Nascimento || '' %>" max="<%= new Date().toISOString().slice(0, 10) %>" value="<%= formValues.startDate %>"></label>
+    <label>Término<input type="date" name="endDate" min="<%= formValues.startDate %>" max="<%= new Date().toISOString().slice(0, 10) %>" value="<%= formValues.endDate %>"></label>
+    <div class="property-form-actions livestock-form-actions">
+      <button class="primary-button" type="submit">Salvar alterações</button>
+      <a class="secondary-button" href="/pecuaria/lactacoes?propertyId=<%= lactation.idPropriedade %>">Cancelar</a>
+    </div>
+  </form>
+</section>
+<%- include('partials/footer') %>

@@ -1,0 +1,39 @@
+<%- include('partials/header') %>
+<section class="page-heading">
+  <div>
+    <a class="back-link" href="/modulos/<%= moduleOrigin %>">&larr; <%= moduleOrigin === 'pecuaria' ? 'Pecuária de Leite' : 'Atividades Agrícolas' %></a>
+    <p class="eyebrow">COMERCIALIZAÇÃO</p>
+    <h1>Entregas</h1>
+  </div>
+</section>
+<section class="user-list-section property-list-section">
+  <h2>Entregas por produção</h2>
+  <% if (deliveries.length) { %>
+    <div class="table-scroll">
+      <table class="users-table agriculture-deliveries-table">
+        <thead><tr><th>Entrega</th><th>Data</th><th>Associação</th><th>Produtor / propriedade</th><th>Produto</th><th>Comprador</th><th>Quantidade</th><th>Valor unitário</th><th>Valor total</th><th>Documento</th><th>Produção</th><th>Ações</th></tr></thead>
+        <tbody>
+          <% deliveries.forEach((delivery) => { %>
+            <tr>
+              <td><%= delivery.idEntrega || '—' %></td>
+              <td><%= formatDate(delivery.DataEntrega) %></td>
+              <td><%= delivery.AssociacaoNome %></td>
+              <td><%= delivery.ProdutorNome %><br><strong><%= delivery.PropriedadeNome %></strong></td>
+              <td><%= delivery.ProdutoNome %> (<%= delivery.UnidadeSigla %>)</td>
+              <td><%= delivery.NomeComprador || '—' %></td>
+              <td><%= delivery.Quantidade === null ? '—' : `${Number(delivery.Quantidade).toLocaleString('pt-BR', { maximumFractionDigits: 2 })} ${delivery.UnidadeSigla}` %></td>
+              <td class="money-cell"><%= delivery.ValorUnitario === null ? '—' : Number(delivery.ValorUnitario).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %></td>
+              <td class="money-cell"><%= delivery.ValorTotal === null ? '—' : Number(delivery.ValorTotal).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %></td>
+              <td><%= delivery.DocumentoEntrega || '—' %></td>
+              <td>#<%= delivery.IdProducao %> · <%= delivery.Situacao %></td>
+              <td class="user-actions"><a class="small-button" href="<%= moduleBasePath %>/<%= delivery.IdProducao %>/entregas">Abrir</a></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <p class="empty-state">Nenhuma produção <%= activityLabel %> disponível para registrar Entregas.</p>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

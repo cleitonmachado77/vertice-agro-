@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Vértice Agro</title>
+  <g fill="#8b9094" stroke="#e7ad6c" stroke-linecap="round" stroke-linejoin="round" stroke-width="7">
+    <path d="M16 16h28c12 0 20 8 20 20v22c-6-9-14-13-26-13H16z"/>
+    <path d="M112 16H84c-12 0-20 8-20 20v22c6-9 14-13 26-13h22z"/>
+    <path d="M64 55c-16 12-30 24-30 41a30 30 0 0 0 60 0c0-17-14-29-30-41z"/>
+  </g>
+  <path d="M64 59v18m0 0c-7-9-13-14-21-16m21 16c7-9 13-14 21-16" fill="none" stroke="#e7ad6c" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"/>
+</svg>
